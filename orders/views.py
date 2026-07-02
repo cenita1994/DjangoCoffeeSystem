@@ -34,6 +34,25 @@ def user_is_customer(user):
     return user.groups.filter(name='Customer').exists()
 
 
+def get_base_product_name(product):
+    name = product.name.strip()
+
+    suffixes = [
+        "Regular",
+        "Upgrade",
+        "Mega",
+        "Large",
+        "Not Applicable",
+    ]
+
+    for suffix in suffixes:
+        ending = f" - {suffix}"
+        if name.endswith(ending):
+            return name[:-len(ending)].strip()
+
+    return name
+
+
 def build_grouped_menu_products():
     products = Product.objects.select_related(
         'stock',
@@ -48,7 +67,8 @@ def build_grouped_menu_products():
         'Regular': 1,
         'Upgrade': 2,
         'Mega': 3,
-        'Not Applicable': 4,
+        'Large': 4,
+        'Not Applicable': 5,
     }
 
     grouped_products = {}
@@ -56,7 +76,8 @@ def build_grouped_menu_products():
 
     for product in products:
         category_name = product.display_category()
-        product_key = product.name.strip().lower()
+        base_name = get_base_product_name(product)
+        product_key = base_name.lower()
 
         if category_name not in grouped_products:
             grouped_products[category_name] = []
@@ -64,7 +85,7 @@ def build_grouped_menu_products():
 
         if product_key not in grouped_lookup[category_name]:
             product_group = {
-                'name': product.name,
+                'name': base_name,
                 'category_name': category_name,
                 'description': product.description,
                 'image': product.image,
