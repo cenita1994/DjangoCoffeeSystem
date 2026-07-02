@@ -1,0 +1,230 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Product Sales Report | Django Coffee System
+{% endblock %}
+
+{% block content %}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">Product Sales and Profit Report</h2>
+        <p class="text-muted mb-0">
+            Product-level sales, cost, and estimated gross profit summary.
+        </p>
+    </div>
+
+    <div class="d-flex gap-2 flex-wrap">
+        <a href="{% url 'reports_center' %}" class="btn btn-outline-dark">
+            <i class="bi bi-arrow-left me-1"></i>
+            Reports Center
+        </a>
+
+        <a href="{% url 'product_sales_export' %}?date_from={{ date_from|date:'Y-m-d' }}&date_to={{ date_to|date:'Y-m-d' }}&category={{ category }}"
+           class="btn btn-success">
+            <i class="bi bi-file-earmark-excel me-1"></i>
+            Export Excel
+        </a>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3 align-items-end">
+
+            <div class="col-12 col-md-3">
+                <label class="form-label fw-semibold">Date From</label>
+                <input type="date"
+                       name="date_from"
+                       value="{{ date_from|date:'Y-m-d' }}"
+                       class="form-control">
+            </div>
+
+            <div class="col-12 col-md-3">
+                <label class="form-label fw-semibold">Date To</label>
+                <input type="date"
+                       name="date_to"
+                       value="{{ date_to|date:'Y-m-d' }}"
+                       class="form-control">
+            </div>
+
+            <div class="col-12 col-md-3">
+                <label class="form-label fw-semibold">Category</label>
+                <select name="category" class="form-select">
+                    <option value="">All Categories</option>
+
+                    {% for item in categories %}
+                    <option value="{{ item }}" {% if category == item %}selected{% endif %}>
+                        {{ item }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-12 col-md-3">
+                <button type="submit" class="btn btn-dark w-100">
+                    <i class="bi bi-funnel me-1"></i>
+                    Apply Filter
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Net Sales</p>
+                <h4 class="fw-bold mb-0">₱{{ summary.net_sales|floatformat:2 }}</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Product Cost</p>
+                <h4 class="fw-bold mb-0">₱{{ summary.product_cost|floatformat:2 }}</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Est. Gross Profit</p>
+                <h4 class="fw-bold mb-0">₱{{ summary.estimated_gross_profit|floatformat:2 }}</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Quantity Sold</p>
+                <h4 class="fw-bold mb-0">{{ summary.quantity_sold }}</h4>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="alert alert-warning small">
+    <i class="bi bi-info-circle me-1"></i>
+    Estimated gross profit is computed as <strong>Net Sales - Product Cost</strong>.
+    This is not yet final net profit because cash payouts, rent, utilities, salaries, and other operating expenses are not included here.
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-dark text-white">
+        <h5 class="mb-0">
+            <i class="bi bi-table me-1"></i>
+            Product Sales and Profit Table
+        </h5>
+    </div>
+
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Code</th>
+                        <th>Product</th>
+                        <th>Size</th>
+                        <th>Category</th>
+                        <th class="text-end">Orders</th>
+                        <th class="text-end">Qty Sold</th>
+                        <th class="text-end">Gross Sales</th>
+                        <th class="text-end">Discounts</th>
+                        <th class="text-end">Net Sales</th>
+                        <th class="text-end">Product Cost</th>
+                        <th class="text-end">Est. Gross Profit</th>
+                        <th class="text-end">Avg. Price</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for row in rows %}
+                    <tr>
+                        <td>
+                            {% if row.product_code %}
+                                <span class="badge bg-light text-dark border">
+                                    {{ row.product_code }}
+                                </span>
+                            {% else %}
+                                <span class="text-muted small">N/A</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="fw-semibold">{{ row.product_name }}</td>
+
+                        <td>
+                            {% if row.size == "Regular" %}
+                                <span class="badge bg-primary">Regular</span>
+                            {% elif row.size == "Upgrade" %}
+                                <span class="badge bg-warning text-dark">Upgrade</span>
+                            {% elif row.size == "Mega" %}
+                                <span class="badge bg-danger">Mega</span>
+                            {% else %}
+                                <span class="badge bg-secondary">N/A</span>
+                            {% endif %}
+                        </td>
+
+                        <td>{{ row.category }}</td>
+                        <td class="text-end">{{ row.order_count }}</td>
+                        <td class="text-end">{{ row.quantity_sold }}</td>
+                        <td class="text-end">₱{{ row.gross_sales|floatformat:2 }}</td>
+                        <td class="text-end text-danger">₱{{ row.total_discounts|floatformat:2 }}</td>
+                        <td class="text-end fw-semibold">₱{{ row.net_sales|floatformat:2 }}</td>
+                        <td class="text-end">₱{{ row.product_cost|floatformat:2 }}</td>
+
+                        <td class="text-end fw-bold">
+                            {% if row.estimated_gross_profit >= 0 %}
+                                <span class="text-success">
+                                    ₱{{ row.estimated_gross_profit|floatformat:2 }}
+                                </span>
+                            {% else %}
+                                <span class="text-danger">
+                                    ₱{{ row.estimated_gross_profit|floatformat:2 }}
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <td class="text-end">₱{{ row.average_selling_price|floatformat:2 }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="12" class="text-center text-muted py-4">
+                            No product sales found for the selected filters.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+                {% if rows %}
+                <tfoot class="table-light">
+                    <tr class="fw-bold">
+                        <td>Total</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td class="text-end">{{ summary.order_count }}</td>
+                        <td class="text-end">{{ summary.quantity_sold }}</td>
+                        <td class="text-end">₱{{ summary.gross_sales|floatformat:2 }}</td>
+                        <td class="text-end text-danger">₱{{ summary.total_discounts|floatformat:2 }}</td>
+                        <td class="text-end">₱{{ summary.net_sales|floatformat:2 }}</td>
+                        <td class="text-end">₱{{ summary.product_cost|floatformat:2 }}</td>
+                        <td class="text-end text-success">₱{{ summary.estimated_gross_profit|floatformat:2 }}</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+                {% endif %}
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

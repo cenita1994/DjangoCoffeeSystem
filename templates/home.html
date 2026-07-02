@@ -1,0 +1,286 @@
+{% extends 'base.html' %}
+
+{% block title %}Home | Django Coffee System{% endblock %}
+
+{% block content %}
+
+<style>
+    .landing-hero {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f5f0 100%);
+        border-radius: 24px;
+        padding: 48px 32px;
+    }
+
+    .hero-badge {
+        font-size: 0.78rem;
+        letter-spacing: 0.02em;
+    }
+
+    .hero-title {
+        font-size: clamp(2rem, 4vw, 3.5rem);
+        line-height: 1.1;
+    }
+
+    .hero-description {
+        max-width: 720px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .menu-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        overflow: hidden;
+    }
+
+    .menu-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.08) !important;
+    }
+
+    .menu-image {
+        height: 210px;
+        width: 100%;
+        object-fit: contain;
+        background-color: #f8f9fa;
+        padding: 8px;
+    }
+
+    .menu-placeholder {
+        height: 210px;
+        background-color: #f8f9fa;
+    }
+
+    .variant-box {
+        background-color: #ffffff;
+    }
+
+    @media (max-width: 575.98px) {
+        .landing-hero {
+            padding: 36px 20px;
+            border-radius: 18px;
+        }
+
+        .menu-image,
+        .menu-placeholder {
+            height: 180px;
+        }
+
+        .hero-description {
+            font-size: 1rem;
+        }
+    }
+
+    @media (min-width: 992px) {
+        .menu-image,
+        .menu-placeholder {
+            height: 220px;
+        }
+    }
+</style>
+
+<section class="landing-hero text-center mb-5 shadow-sm border">
+    <span class="badge bg-dark px-3 py-2 mb-3 hero-badge">
+        <i class="bi bi-cup-hot me-1"></i>
+        Coffee Shop Ordering System
+    </span>
+
+    <h1 class="fw-bold hero-title mb-3">
+        Welcome to Django Coffee System
+    </h1>
+
+    <p class="text-muted lead hero-description mb-4">
+        Browse our coffee menu, check available products, and create a customer account when you are ready to order online.
+    </p>
+
+    <a href="{% url 'customer_register' %}" class="btn btn-dark btn-lg px-4">
+        <i class="bi bi-person-plus me-1"></i>
+        Create Customer Account
+    </a>
+</section>
+
+{% if public_announcements %}
+<section class="mb-5">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
+        <div>
+            <h2 class="fw-bold mb-1">Latest Announcements</h2>
+            <p class="text-muted mb-0">
+                Updates, notices, and promos from the coffee shop.
+            </p>
+        </div>
+
+        <span class="badge bg-light text-dark border px-3 py-2 align-self-start align-self-md-center">
+            <i class="bi bi-megaphone me-1"></i>
+            Public Updates
+        </span>
+    </div>
+
+    <div class="row g-3">
+        {% for announcement in public_announcements %}
+        <div class="col-12 col-lg-4">
+            <div class="card border-0 shadow-sm h-100 overflow-hidden">
+
+                {% if announcement.image %}
+                <img src="{{ announcement.image.url }}"
+                     alt="{{ announcement.title }}"
+                     class="img-fluid border-bottom"
+                     style="height: 220px; width: 100%; object-fit: contain; background-color: #f8f9fa;">
+                {% endif %}
+
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                        <h5 class="fw-bold mb-0">
+                            {{ announcement.title }}
+                        </h5>
+
+                        <span class="badge bg-dark text-nowrap">
+                            New
+                        </span>
+                    </div>
+
+                    <div class="text-muted small mb-3">
+                        {{ announcement.content|safe }}
+                    </div>
+
+                    <div class="small text-muted">
+                        <i class="bi bi-calendar3 me-1"></i>
+                        {{ announcement.created_at|date:"M d, Y" }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<section id="menu-preview">
+
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Our Coffee Menu</h2>
+            <p class="text-muted mb-0">
+                View available products, sizes, prices, and stock availability.
+            </p>
+        </div>
+
+        <span class="badge bg-light text-dark border px-3 py-2 align-self-start align-self-md-center">
+            <i class="bi bi-eye me-1"></i>
+            Menu Preview
+        </span>
+    </div>
+
+    {% if grouped_products %}
+
+        {% for category_name, product_groups in grouped_products.items %}
+
+        <div class="d-flex align-items-center gap-2 mt-4 mb-3">
+            <div class="flex-grow-1 border-top"></div>
+
+            <span class="badge bg-dark px-3 py-2">
+                <i class="bi bi-tags me-1"></i>
+                {{ category_name }}
+            </span>
+
+            <div class="flex-grow-1 border-top"></div>
+        </div>
+
+        <div class="row g-4 mb-4">
+
+            {% for product_group in product_groups %}
+            <div class="col-12 col-sm-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-0 menu-card">
+
+                    {% if product_group.image %}
+                    <img src="{{ product_group.image.url }}"
+                         class="card-img-top menu-image"
+                         alt="{{ product_group.name }}">
+                    {% else %}
+                    <div class="menu-placeholder d-flex align-items-center justify-content-center">
+                        <i class="bi bi-cup-hot display-4 text-muted"></i>
+                    </div>
+                    {% endif %}
+
+                    <div class="card-body d-flex flex-column">
+
+                        <h5 class="fw-bold mb-2">
+                            {{ product_group.name }}
+                        </h5>
+
+                        {% if product_group.description %}
+                        <p class="text-muted small mb-3">
+                            {{ product_group.description|truncatechars:90 }}
+                        </p>
+                        {% else %}
+                        <p class="text-muted small mb-3">
+                            No description available.
+                        </p>
+                        {% endif %}
+
+                        <div class="mt-auto">
+                            <div class="small text-muted fw-semibold mb-2">
+                                Available options
+                            </div>
+
+                            <div class="d-grid gap-2">
+
+                                {% for variant in product_group.variants %}
+                                <div class="variant-box border rounded p-2">
+                                    <div class="d-flex justify-content-between align-items-center gap-2">
+                                        <span class="fw-semibold">
+                                            {% if variant.size == "Not Applicable" %}
+                                                Standard
+                                            {% else %}
+                                                {{ variant.size }}
+                                            {% endif %}
+                                        </span>
+
+                                        <span class="fw-bold text-nowrap">
+                                            ₱{{ variant.price|floatformat:2 }}
+                                        </span>
+                                    </div>
+
+                                    <div class="small mt-1">
+                                        {% if variant.current_stock > 0 %}
+                                            <span class="text-success">
+                                                <i class="bi bi-check-circle me-1"></i>
+                                                Available
+                                            </span>
+                                        {% else %}
+                                            <span class="text-danger">
+                                                <i class="bi bi-x-circle me-1"></i>
+                                                Out of Stock
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% endfor %}
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+        </div>
+
+        {% endfor %}
+
+    {% else %}
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body text-center py-5">
+            <i class="bi bi-cup-hot display-4 text-muted"></i>
+            <h5 class="fw-bold mt-3">No products available</h5>
+            <p class="text-muted mb-0">
+                There are no menu items available at the moment.
+            </p>
+        </div>
+    </div>
+
+    {% endif %}
+
+</section>
+
+{% endblock %}

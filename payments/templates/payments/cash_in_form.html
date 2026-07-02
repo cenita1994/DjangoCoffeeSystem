@@ -1,0 +1,245 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Cash In | Django Coffee System
+{% endblock %}
+
+{% block content %}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">Cash In Customer Wallet</h2>
+        <p class="text-muted mb-0">
+            Search customer, select account, and add balance.
+        </p>
+    </div>
+
+    <div class="d-flex gap-2 flex-wrap">
+        <a href="{% url 'wallet_list' %}" class="btn btn-outline-dark">
+            <i class="bi bi-arrow-left me-1"></i>
+            Back to Wallets
+        </a>
+
+        <a href="{% url 'wallet_transaction_list' %}" class="btn btn-outline-dark">
+            <i class="bi bi-clock-history me-1"></i>
+            Transactions
+        </a>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-dark text-white">
+        <h4 class="mb-0">
+            <i class="bi bi-cash-stack me-1"></i>
+            Cash-In Form
+        </h4>
+    </div>
+
+    <div class="card-body p-4">
+
+        <form method="GET" class="row g-2 mb-4">
+            <div class="col-12 col-md-10">
+                <input type="text"
+                       name="customer_q"
+                       value="{{ customer_search }}"
+                       class="form-control"
+                       placeholder="Search customer by username, name, or email">
+            </div>
+
+            <div class="col-12 col-md-2">
+                <button type="submit" class="btn btn-dark w-100">
+                    <i class="bi bi-search me-1"></i>
+                    Search
+                </button>
+            </div>
+        </form>
+
+        {% if customer_search and not customer_results %}
+            <div class="alert alert-warning">
+                No customer account found. Please check if the account exists and has the Customer role.
+            </div>
+        {% endif %}
+
+        {% if not customer_search %}
+            <div class="alert alert-info">
+                Search a customer account first before processing cash-in.
+            </div>
+        {% endif %}
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <input type="hidden" name="customer_search" value="{{ customer_search }}">
+
+            {% if form.selected_customer_id.errors %}
+                <div class="alert alert-danger">
+                    Please select a valid customer account.
+                </div>
+            {% endif %}
+
+            {% if customer_results %}
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">
+                        Select Customer Account
+                    </label>
+
+                    <div class="row g-3">
+                        {% for customer in customer_results %}
+                        <div class="col-12 col-md-6">
+                            <label class="border rounded p-3 w-100 h-100 customer-option">
+                                <div class="form-check">
+                                    <input class="form-check-input"
+                                           type="radio"
+                                           name="selected_customer_id"
+                                           id="customer{{ customer.id }}"
+                                           value="{{ customer.id }}"
+                                           {% if selected_customer_id == customer.id|stringformat:"s" %}checked{% endif %}>
+
+                                    <span class="form-check-label fw-bold">
+                                        {{ customer.username }}
+                                    </span>
+                                </div>
+
+                                <div class="small text-muted mt-2">
+                                    {% if customer.get_full_name %}
+                                        {{ customer.get_full_name }}
+                                    {% else %}
+                                        No full name
+                                    {% endif %}
+                                </div>
+
+                                <div class="small text-muted">
+                                    {% if customer.email %}
+                                        {{ customer.email }}
+                                    {% else %}
+                                        No email
+                                    {% endif %}
+                                </div>
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <div class="row g-3">
+
+                    <div class="col-12 col-md-6">
+                        <label class="form-label fw-semibold" for="{{ form.payment_method.id_for_label }}">
+                            Payment Method
+                        </label>
+                        {{ form.payment_method }}
+
+                        {% if form.payment_method.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ form.payment_method.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-12 col-md-6" id="referenceNumberWrapper">
+                        <label class="form-label fw-semibold" for="{{ form.reference_number.id_for_label }}">
+                            GCash Reference Number
+                        </label>
+                        {{ form.reference_number }}
+
+                        {% if form.reference_number.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ form.reference_number.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label class="form-label fw-semibold" for="{{ form.amount.id_for_label }}">
+                            Cash-In Amount
+                        </label>
+                        {{ form.amount }}
+
+                        {% if form.amount.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ form.amount.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label fw-semibold" for="{{ form.remarks.id_for_label }}">
+                            Remarks
+                        </label>
+                        {{ form.remarks }}
+
+                        {% if form.remarks.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ form.remarks.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                </div>
+
+                <div class="alert alert-secondary small mt-4">
+                    <strong>Audit Trail:</strong>
+                    The selected customer account and the logged-in staff account will be recorded automatically.
+                </div>
+
+                <div class="d-flex flex-column flex-sm-row justify-content-between gap-2 mt-4">
+                    <a href="{% url 'wallet_list' %}" class="btn btn-secondary">
+                        Back
+                    </a>
+
+                    <button type="submit" class="btn btn-dark">
+                        <i class="bi bi-plus-circle me-1"></i>
+                        Confirm Cash In
+                    </button>
+                </div>
+            {% endif %}
+        </form>
+
+    </div>
+</div>
+
+<style>
+    .customer-option {
+        cursor: pointer;
+        background-color: #fff;
+        transition: 0.2s ease;
+    }
+
+    .customer-option:hover {
+        background-color: #f8f9fa;
+        border-color: #212529 !important;
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const paymentMethod = document.getElementById("id_payment_method");
+        const referenceWrapper = document.getElementById("referenceNumberWrapper");
+        const referenceInput = document.getElementById("id_reference_number");
+
+        function toggleReferenceNumber() {
+            if (!paymentMethod || !referenceWrapper || !referenceInput) {
+                return;
+            }
+
+            if (paymentMethod.value === "GCash") {
+                referenceWrapper.style.display = "block";
+                referenceInput.required = true;
+            } else {
+                referenceWrapper.style.display = "none";
+                referenceInput.required = false;
+                referenceInput.value = "";
+            }
+        }
+
+        toggleReferenceNumber();
+
+        if (paymentMethod) {
+            paymentMethod.addEventListener("change", toggleReferenceNumber);
+        }
+    });
+</script>
+
+{% endblock %}

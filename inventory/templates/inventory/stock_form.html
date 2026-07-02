@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Adjust Selling Limit | Django Coffee System
+{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-7">
+
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-dark text-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-box-seam me-1"></i>
+                    Adjust Product Selling Limit
+                </h4>
+            </div>
+
+            <div class="card-body p-4">
+                <div class="alert alert-info">
+                    Product selling limit controls how many orders customers can still place for this product.
+                    Actual ingredient inventory and deliveries are managed separately.
+                </div>
+
+                <form method="POST" id="stockForm">
+                    {% csrf_token %}
+
+                    {{ form.as_p }}
+
+                    <div class="d-flex flex-column flex-sm-row justify-content-between gap-2 mt-4">
+                        <a href="{% url 'stock_list' %}" class="btn btn-secondary">
+                            Back
+                        </a>
+
+                        <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#saveStockModal">
+                            Save Selling Limit
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="modal fade" id="saveStockModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-question-circle me-1"></i>
+                    Confirm Save
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body text-center p-4">
+                <p class="mb-0">
+                    Are you sure you want to save this product selling limit?
+                </p>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    Cancel
+                </button>
+
+                <button type="submit" form="stockForm" class="btn btn-dark">
+                    Yes, Save
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

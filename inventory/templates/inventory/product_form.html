@@ -1,0 +1,304 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Product Form | Django Coffee System
+{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+    <div class="col-12 col-md-10 col-lg-9">
+
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">
+                    <i class="bi bi-cup-hot me-1"></i>
+                    Product Form
+                </h4>
+
+                <span class="badge bg-light text-dark">
+                    Inventory Management
+                </span>
+            </div>
+
+            <div class="card-body p-4">
+
+                <div class="alert alert-info small mb-4">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Select an existing category. If the category is not available, choose
+                    <strong>Others / Add New Category</strong>. Product code may be left blank and will be auto-generated.
+                </div>
+
+                <form method="POST" enctype="multipart/form-data" id="productForm">
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {{ form.non_field_errors }}
+                    </div>
+                    {% endif %}
+
+                    <div class="row g-3">
+
+                        <div class="col-12 col-md-6">
+                            <label class="form-label fw-semibold">
+                                Product Code / SKU
+                            </label>
+
+                            {{ form.product_code }}
+
+                            {% if form.product_code.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ form.product_code.errors }}
+                            </div>
+                            {% endif %}
+
+                            <div class="form-text">
+                                Optional. Leave blank to auto-generate after saving.
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label class="form-label fw-semibold">
+                                Product Name
+                            </label>
+
+                            {{ form.name }}
+
+                            {% if form.name.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ form.name.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label class="form-label fw-semibold mb-0">
+                                    Category
+                                </label>
+
+                                <a href="{% url 'category_list' %}" class="small text-decoration-none">
+                                    <i class="bi bi-gear me-1"></i>
+                                    Manage Categories
+                                </a>
+                            </div>
+
+                            {{ form.category_choice }}
+
+                            {% if form.category_choice.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ form.category_choice.errors }}
+                            </div>
+                            {% endif %}
+
+                            <div class="form-text">
+                                Choose a category or select Others to add a new one.
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6" id="newCategoryWrapper" style="display: none;">
+                            <label class="form-label fw-semibold">
+                                New Category Name
+                            </label>
+
+                            {{ form.new_category }}
+
+                            {% if form.new_category.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ form.new_category.errors }}
+                            </div>
+                            {% endif %}
+
+                            <div class="form-text">
+                                This category will be saved and added to the dropdown automatically.
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label class="form-label fw-semibold">
+                                Size
+                            </label>
+
+                            {{ form.size }}
+
+                            {% if form.size.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ form.size.errors }}
+                            </div>
+                            {% endif %}
+
+                            <div class="form-text">
+                                Select Regular, Upgrade, Mega, or Not Applicable.
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-3">
+                            <label class="form-label fw-semibold">
+                                Selling Price
+                            </label>
+
+                            <div class="input-group">
+                                <span class="input-group-text">₱</span>
+                                {{ form.price }}
+                            </div>
+
+                            {% if form.price.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ form.price.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-12 col-md-3">
+                            <label class="form-label fw-semibold">
+                                Cost Price
+                            </label>
+
+                            <div class="input-group">
+                                <span class="input-group-text">₱</span>
+                                {{ form.cost_price }}
+                            </div>
+
+                            {% if form.cost_price.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ form.cost_price.errors }}
+                            </div>
+                            {% endif %}
+
+                            <div class="form-text">
+                                Puhunan per item.
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">
+                                Description
+                            </label>
+
+                            {{ form.description }}
+
+                            {% if form.description.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ form.description.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">
+                                Product Image
+                            </label>
+
+                            {{ form.image }}
+
+                            {% if form.image.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ form.image.errors }}
+                            </div>
+                            {% endif %}
+
+                            <div class="form-text">
+                                Optional. Upload a product image for the menu display.
+                            </div>
+                        </div>
+
+                        {% if form.instance.image %}
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">
+                                Current Image
+                            </label>
+
+                            <div class="border rounded p-3 bg-light">
+                                <img src="{{ form.instance.image.url }}"
+                                     alt="{{ form.instance.name }}"
+                                     class="img-thumbnail"
+                                     style="max-height: 160px;">
+                            </div>
+                        </div>
+                        {% endif %}
+
+                    </div>
+
+                    <div class="d-flex flex-column flex-sm-row justify-content-between gap-2 mt-4">
+                        <a href="{% url 'product' %}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>
+                            Back
+                        </a>
+
+                        <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#saveModal">
+                            <i class="bi bi-save me-1"></i>
+                            Save Product
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="modal fade" id="saveModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-question-circle me-1"></i>
+                    Confirm Save
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body text-center p-4">
+                <i class="bi bi-cup-hot fs-1 text-dark"></i>
+
+                <p class="mt-3 mb-0">
+                    Are you sure you want to save this product?
+                </p>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    Cancel
+                </button>
+
+                <button type="submit" form="productForm" class="btn btn-dark">
+                    Yes, Save
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const categorySelect = document.getElementById("id_category_choice");
+        const newCategoryWrapper = document.getElementById("newCategoryWrapper");
+        const newCategoryInput = document.getElementById("id_new_category");
+
+        function toggleNewCategory() {
+            if (!categorySelect || !newCategoryWrapper || !newCategoryInput) {
+                return;
+            }
+
+            if (categorySelect.value === "__other__") {
+                newCategoryWrapper.style.display = "block";
+                newCategoryInput.required = true;
+            } else {
+                newCategoryWrapper.style.display = "none";
+                newCategoryInput.required = false;
+                newCategoryInput.value = "";
+            }
+        }
+
+        toggleNewCategory();
+
+        if (categorySelect) {
+            categorySelect.addEventListener("change", toggleNewCategory);
+        }
+    });
+</script>
+
+{% endblock %}

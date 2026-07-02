@@ -1,0 +1,279 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Demand Forecasting | Django Coffee System
+{% endblock %}
+
+{% block content %}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">Demand Forecasting</h2>
+        <p class="text-muted mb-0">
+            Product demand, ingredient restock recommendation, and sales/profit projection.
+        </p>
+    </div>
+
+    <a href="{% url 'export_forecasting_report' %}?{{ query_params }}" class="btn btn-dark">
+        <i class="bi bi-file-earmark-excel me-1"></i>
+        Export Excel
+    </a>
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-dark text-white">
+        <h5 class="mb-0">
+            <i class="bi bi-funnel me-1"></i>
+            Forecast Settings
+        </h5>
+    </div>
+
+    <div class="card-body">
+        <form method="GET" class="row g-3 align-items-end">
+            <div class="col-12 col-md-3">
+                <label class="form-label fw-semibold">Historical Date From</label>
+                {{ form.date_from }}
+            </div>
+
+            <div class="col-12 col-md-3">
+                <label class="form-label fw-semibold">Historical Date To</label>
+                {{ form.date_to }}
+            </div>
+
+            <div class="col-12 col-md-3">
+                <label class="form-label fw-semibold">Forecast Horizon</label>
+                {{ form.forecast_days }}
+            </div>
+
+            <div class="col-12 col-md-3">
+                <button type="submit" class="btn btn-dark w-100">
+                    <i class="bi bi-graph-up-arrow me-1"></i>
+                    Generate Forecast
+                </button>
+            </div>
+        </form>
+
+        <p class="text-muted small mt-3 mb-0">
+            Forecast is based on paid, non-cancelled orders from {{ date_from }} to {{ date_to }}.
+            The system computes average daily sales, projects demand for the next {{ forecast_days }} days,
+            then converts projected product demand into ingredient requirements using active product recipes.
+        </p>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+
+    <div class="col-12 col-md-3">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Products Forecasted</p>
+                <h3 class="fw-bold mb-0">{{ product_summary.product_count }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-3">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Projected Quantity</p>
+                <h3 class="fw-bold mb-0">{{ product_summary.total_forecast_quantity }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-3">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Projected Sales</p>
+                <h3 class="fw-bold mb-0">₱{{ product_summary.total_projected_sales }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-3">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Projected Profit</p>
+                <h3 class="fw-bold mb-0">₱{{ product_summary.total_projected_profit }}</h3>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">
+            <i class="bi bi-cup-hot me-1"></i>
+            Product Demand Forecast
+        </h5>
+
+        <span class="badge bg-warning text-dark">
+            Next {{ forecast_days }} Days
+        </span>
+    </div>
+
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Product</th>
+                        <th>Category</th>
+                        <th>Historical Sold</th>
+                        <th>Avg Daily</th>
+                        <th>Forecast Qty</th>
+                        <th>Projected Sales</th>
+                        <th>Projected Cost</th>
+                        <th>Projected Profit</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for row in product_rows %}
+                    <tr>
+                        <td>
+                            <div class="fw-semibold">{{ row.product.display_name }}</div>
+                            <span class="text-muted small">{{ row.product.product_code|default:"Auto Code" }}</span>
+                        </td>
+                        <td>{{ row.product.display_category }}</td>
+                        <td>{{ row.quantity_sold }}</td>
+                        <td>{{ row.average_daily_quantity }}</td>
+                        <td class="fw-bold">{{ row.forecast_quantity }}</td>
+                        <td>₱{{ row.projected_sales }}</td>
+                        <td>₱{{ row.projected_cost }}</td>
+                        <td class="fw-bold">₱{{ row.projected_profit }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-4">
+                            No paid sales data found for the selected date range.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">
+            <i class="bi bi-box-seam me-1"></i>
+            Ingredient Demand and Restock Recommendation
+        </h5>
+
+        <span class="badge bg-warning text-dark">
+            {{ ingredient_summary.total_suggested_purchase_items }} Restock Suggested
+        </span>
+    </div>
+
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Ingredient</th>
+                        <th>Projected Used</th>
+                        <th>Buffer</th>
+                        <th>Recommended Qty</th>
+                        <th>Current Stock</th>
+                        <th>Reorder Level</th>
+                        <th>Suggested Purchase</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for row in ingredient_rows %}
+                    <tr>
+                        <td>
+                            <div class="fw-semibold">{{ row.ingredient.name }}</div>
+                            <span class="text-muted small">{{ row.ingredient.unit }}</span>
+                        </td>
+                        <td>{{ row.projected_used_quantity }} {{ row.ingredient.unit }}</td>
+                        <td>{{ row.buffer_quantity }} {{ row.ingredient.unit }}</td>
+                        <td class="fw-bold">{{ row.recommended_quantity }} {{ row.ingredient.unit }}</td>
+                        <td>{{ row.current_quantity }} {{ row.ingredient.unit }}</td>
+                        <td>{{ row.reorder_level }} {{ row.ingredient.unit }}</td>
+                        <td class="fw-bold">{{ row.suggested_purchase_quantity }} {{ row.ingredient.unit }}</td>
+                        <td>
+                            {% if row.status == "Restock Suggested" %}
+                                <span class="badge bg-warning text-dark">{{ row.status }}</span>
+                            {% elif row.status == "Out of Stock" %}
+                                <span class="badge bg-danger">{{ row.status }}</span>
+                            {% elif row.status == "Low Stock" %}
+                                <span class="badge bg-info text-dark">{{ row.status }}</span>
+                            {% else %}
+                                <span class="badge bg-success">{{ row.status }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-4">
+                            No ingredient demand computed. Check if sold products have active recipes.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <p class="text-muted small mb-0">
+            Suggested purchase = recommended ingredient quantity minus current stock.
+            Recommended quantity includes ingredient safety buffer percentage.
+        </p>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-dark text-white">
+        <h5 class="mb-0">
+            <i class="bi bi-journal-text me-1"></i>
+            Product Recipe Demand Details
+        </h5>
+    </div>
+
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Product</th>
+                        <th>Ingredient</th>
+                        <th>Forecast Qty</th>
+                        <th>Required Per Product</th>
+                        <th>Projected Used</th>
+                        <th>Buffer %</th>
+                        <th>Recommended Qty</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for row in detail_rows %}
+                    <tr>
+                        <td>{{ row.product.display_name }}</td>
+                        <td>{{ row.ingredient.name }}</td>
+                        <td>{{ row.forecast_quantity }}</td>
+                        <td>{{ row.quantity_required }} {{ row.ingredient.unit }}</td>
+                        <td>{{ row.projected_used_quantity }} {{ row.ingredient.unit }}</td>
+                        <td>{{ row.safety_buffer_percent }}%</td>
+                        <td class="fw-bold">{{ row.recommended_quantity }} {{ row.ingredient.unit }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">
+                            No recipe demand details available.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

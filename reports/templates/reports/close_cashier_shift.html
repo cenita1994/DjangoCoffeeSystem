@@ -1,0 +1,198 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Close Cashier Shift | Django Coffee System
+{% endblock %}
+
+{% block content %}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">Close Cashier Shift</h2>
+        <p class="text-muted mb-0">
+            Review the expected cash drawer and enter the actual cash counted.
+        </p>
+    </div>
+
+    <div class="d-flex gap-2 flex-wrap">
+        <a href="{% url 'cashier_shift_detail' shift.id %}" class="btn btn-outline-dark">
+            <i class="bi bi-arrow-left me-1"></i>
+            Back to Shift
+        </a>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Opening Cash</p>
+                <h4 class="fw-bold mb-0">₱{{ shift.opening_cash|floatformat:2 }}</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Cash Sales</p>
+                <h4 class="fw-bold mb-0">₱{{ totals.cash_sales|floatformat:2 }}</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Cash-in Received</p>
+                <h4 class="fw-bold mb-0">₱{{ totals.cash_in_received|floatformat:2 }}</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Expected Cash</p>
+                <h4 class="fw-bold mb-0">₱{{ totals.expected_cash|floatformat:2 }}</h4>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="row g-4">
+
+    <div class="col-12 col-xl-5">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-calculator me-1"></i>
+                    Cash Drawer Computation
+                </h5>
+            </div>
+
+            <div class="card-body">
+
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle">
+                        <tbody>
+                            <tr>
+                                <td>Opening Cash</td>
+                                <td class="text-end fw-semibold">₱{{ shift.opening_cash|floatformat:2 }}</td>
+                            </tr>
+
+                            <tr>
+                                <td>Cash Sales</td>
+                                <td class="text-end fw-semibold">₱{{ totals.cash_sales|floatformat:2 }}</td>
+                            </tr>
+
+                            <tr>
+                                <td>Cash-in Received</td>
+                                <td class="text-end fw-semibold">₱{{ totals.cash_in_received|floatformat:2 }}</td>
+                            </tr>
+
+                            <tr>
+                                <td>Cash Refunds</td>
+                                <td class="text-end text-danger fw-semibold">- ₱{{ totals.cash_refunds|floatformat:2 }}</td>
+                            </tr>
+
+                            <tr>
+                                <td>Cash Payouts / Expenses / Cash Drops</td>
+                                <td class="text-end text-danger fw-semibold">- ₱{{ shift.cash_payouts|floatformat:2 }}</td>
+                            </tr>
+
+                            <tr class="table-dark">
+                                <td class="fw-bold">Expected Cash Drawer</td>
+                                <td class="text-end fw-bold">₱{{ totals.expected_cash|floatformat:2 }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="alert alert-info small mb-0">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Wallet sales and GCash sales are sales revenue but are not added to the physical cash drawer.
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-xl-7">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-box-arrow-right me-1"></i>
+                    Close Shift
+                </h5>
+            </div>
+
+            <div class="card-body">
+
+                <form method="POST">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            {{ form.actual_cash_counted.label }}
+                        </label>
+                        {{ form.actual_cash_counted }}
+
+                        {% if form.actual_cash_counted.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ form.actual_cash_counted.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            {{ form.cash_payouts.label }}
+                        </label>
+                        {{ form.cash_payouts }}
+
+                        {% if form.cash_payouts.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ form.cash_payouts.errors.0 }}
+                            </div>
+                        {% endif %}
+
+                        <div class="form-text">
+                            Use this only if the cashier released cash from the drawer for expenses or cash drops.
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            {{ form.remarks.label }}
+                        </label>
+                        {{ form.remarks }}
+
+                        {% if form.remarks.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ form.remarks.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{% url 'cashier_shift_detail' shift.id %}" class="btn btn-outline-secondary">
+                            Cancel
+                        </a>
+
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-lock me-1"></i>
+                            Close Shift
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

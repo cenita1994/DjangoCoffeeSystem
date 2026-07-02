@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Customer Dashboard | Django Coffee System
+{% endblock %}
+
+{% block content %}
+
+<div class="row g-4">
+
+
+<div class="col-12">
+    <div class="p-4 bg-light rounded shadow-sm">
+        <h2 class="fw-bold mb-1">Customer Dashboard</h2>
+        <p class="text-muted mb-0">
+            Welcome, {{ request.user.first_name|default:request.user.username }}.
+            Browse the menu, manage your cart, track your orders, and view your wallet balance.
+        </p>
+    </div>
+</div>
+
+{% include 'accounts/partials/customer_announcements.html' %}
+
+<div class="col-12">
+    <h5 class="fw-bold mt-2 mb-0">Customer Shortcuts</h5>
+    <p class="text-muted mb-0">
+        Quick access to ordering and wallet features.
+    </p>
+</div>
+
+<div class="col-12 col-md-6 col-xl-3">
+    <a href="{% url 'customer_menu' %}" class="text-decoration-none">
+        <div class="card border-0 shadow-sm h-100 dashboard-card">
+            <div class="card-body p-4">
+                <i class="bi bi-cup-hot fs-1 text-warning"></i>
+                <h5 class="fw-bold mt-3 text-dark">Menu</h5>
+                <p class="text-muted small mb-3">
+                    View available coffee shop products and add them to your cart.
+                </p>
+                <span class="btn btn-dark btn-sm">
+                    Browse Menu
+                </span>
+            </div>
+        </div>
+    </a>
+</div>
+
+<div class="col-12 col-md-6 col-xl-3">
+    <a href="{% url 'cart' %}" class="text-decoration-none">
+        <div class="card border-0 shadow-sm h-100 dashboard-card">
+            <div class="card-body p-4">
+                <i class="bi bi-cart3 fs-1 text-warning"></i>
+                <h5 class="fw-bold mt-3 text-dark">Cart</h5>
+                <p class="text-muted small mb-3">
+                    Review your selected products before placing your order.
+                </p>
+                <span class="btn btn-outline-dark btn-sm">
+                    View Cart
+                </span>
+            </div>
+        </div>
+    </a>
+</div>
+
+<div class="col-12 col-md-6 col-xl-3">
+    <a href="{% url 'my_orders' %}" class="text-decoration-none">
+        <div class="card border-0 shadow-sm h-100 dashboard-card">
+            <div class="card-body p-4">
+                <i class="bi bi-clock-history fs-1 text-warning"></i>
+                <h5 class="fw-bold mt-3 text-dark">My Orders</h5>
+                <p class="text-muted small mb-3">
+                    Track your placed orders and view their current status.
+                </p>
+                <span class="btn btn-outline-dark btn-sm">
+                    View My Orders
+                </span>
+            </div>
+        </div>
+    </a>
+</div>
+
+<div class="col-12 col-md-6 col-xl-3">
+    <a href="{% url 'my_wallet' %}" class="text-decoration-none">
+        <div class="card border-0 shadow-sm h-100 dashboard-card">
+            <div class="card-body p-4">
+                <i class="bi bi-wallet2 fs-1 text-warning"></i>
+                <h5 class="fw-bold mt-3 text-dark">My Wallet</h5>
+                <p class="text-muted small mb-3">
+                    View your wallet balance and wallet transaction history.
+                </p>
+                <span class="btn btn-outline-dark btn-sm">
+                    View Wallet
+                </span>
+            </div>
+        </div>
+    </a>
+</div>
+
+
+</div>
+
+{% endblock %}

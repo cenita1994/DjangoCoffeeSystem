@@ -1,0 +1,111 @@
+<div class="row g-3 mb-4">
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Net Sales</p>
+                <h3 class="fw-bold mb-0">₱{{ total_sales|floatformat:2 }}</h3>
+                <p class="small text-muted mb-0">Paid and non-cancelled orders</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Cash Sales</p>
+                <h3 class="fw-bold mb-0">₱{{ cash_sales|floatformat:2 }}</h3>
+                <p class="small text-muted mb-0">Physical cash from sales only</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">GCash Sales</p>
+                <h3 class="fw-bold mb-0">₱{{ gcash_sales|floatformat:2 }}</h3>
+                <p class="small text-muted mb-0">Digital payment sales</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Wallet Sales</p>
+                <h3 class="fw-bold mb-0">₱{{ wallet_sales|floatformat:2 }}</h3>
+                <p class="small text-muted mb-0">Paid using customer wallet</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="row g-3 mb-4">
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Gross Sales</p>
+                <h4 class="fw-bold mb-0">₱{{ gross_sales|floatformat:2 }}</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Discounts</p>
+                <h4 class="fw-bold text-danger mb-0">₱{{ total_discounts|floatformat:2 }}</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">VAT Amount</p>
+                <h4 class="fw-bold mb-0">₱{{ vat_amount|floatformat:2 }}</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Paid Orders</p>
+                <h4 class="fw-bold mb-0">{{ paid_order_count }}</h4>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="row g-3 mb-4">
+
+    <div class="col-12 col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">VATable Sales</p>
+                <h5 class="fw-bold mb-0">₱{{ vatable_sales|floatformat:2 }}</h5>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">VAT-Exempt Sales</p>
+                <h5 class="fw-bold mb-0">₱{{ vat_exempt_sales|floatformat:2 }}</h5>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="alert alert-info small mb-4">
+    <i class="bi bi-info-circle me-1"></i>
+    Cash sales, GCash sales, and wallet sales are sales revenue.
+    Wallet cash-in/top-up is different and should be handled in a separate Wallet Cash-in Report.
+</div>

@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block title %}
+{{ page_title }} | Django Coffee System
+{% endblock %}
+
+{% block content %}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">{{ page_title }}</h2>
+        <p class="text-muted mb-0">
+            Add or update raw materials used in product recipes.
+        </p>
+    </div>
+
+    <div>
+        <a href="{% url 'ingredient_list' %}" class="btn btn-outline-dark">
+            <i class="bi bi-arrow-left me-1"></i>
+            Back to Ingredients
+        </a>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-dark text-white">
+        <h5 class="mb-0">
+            <i class="bi bi-box-seam me-1"></i>
+            Ingredient Information
+        </h5>
+    </div>
+
+    <div class="card-body">
+        <form method="POST">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <div class="row g-3">
+
+                <div class="col-12 col-md-6">
+                    <label class="form-label fw-semibold">{{ form.name.label }}</label>
+                    {{ form.name }}
+                    {% if form.name.errors %}
+                        <div class="text-danger small mt-1">{{ form.name.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <label class="form-label fw-semibold">{{ form.unit.label }}</label>
+                    {{ form.unit }}
+                    {% if form.unit.errors %}
+                        <div class="text-danger small mt-1">{{ form.unit.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="col-12 col-md-4">
+                    <label class="form-label fw-semibold">{{ form.current_quantity.label }}</label>
+                    {{ form.current_quantity }}
+                    <div class="form-text">
+                        Current available quantity.
+                    </div>
+                    {% if form.current_quantity.errors %}
+                        <div class="text-danger small mt-1">{{ form.current_quantity.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="col-12 col-md-4">
+                    <label class="form-label fw-semibold">{{ form.reorder_level.label }}</label>
+                    {{ form.reorder_level }}
+                    <div class="form-text">
+                        Minimum quantity before restock warning.
+                    </div>
+                    {% if form.reorder_level.errors %}
+                        <div class="text-danger small mt-1">{{ form.reorder_level.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="col-12 col-md-4">
+                    <label class="form-label fw-semibold">{{ form.safety_buffer_percent.label }}</label>
+                    {{ form.safety_buffer_percent }}
+                    <div class="form-text">
+                        Extra allowance for weekly demand planning.
+                    </div>
+                    {% if form.safety_buffer_percent.errors %}
+                        <div class="text-danger small mt-1">{{ form.safety_buffer_percent.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="col-12">
+                    <div class="form-check mt-2">
+                        {{ form.is_active }}
+                        <label class="form-check-label fw-semibold">
+                            {{ form.is_active.label }}
+                        </label>
+                    </div>
+                    {% if form.is_active.errors %}
+                        <div class="text-danger small mt-1">{{ form.is_active.errors }}</div>
+                    {% endif %}
+                </div>
+
+            </div>
+
+            <div class="alert alert-info small mt-4 mb-0">
+                <i class="bi bi-info-circle me-1"></i>
+                Ingredient quantities will later be used for recipe-based weekly demand planning.
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 mt-4">
+                <a href="{% url 'ingredient_list' %}" class="btn btn-outline-secondary">
+                    Cancel
+                </a>
+
+                <button type="submit" class="btn btn-dark">
+                    <i class="bi bi-save me-1"></i>
+                    {{ button_text }}
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+{% endblock %}

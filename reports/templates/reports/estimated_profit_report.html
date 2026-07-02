@@ -1,0 +1,246 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Estimated Profit Report | Django Coffee System
+{% endblock %}
+
+{% block content %}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">Estimated Profit Report</h2>
+        <p class="text-muted mb-0">
+            Summary of sales, product cost, gross profit, cash payouts, and estimated net profit.
+        </p>
+    </div>
+
+    <div class="d-flex gap-2 flex-wrap">
+        <a href="{% url 'reports_center' %}" class="btn btn-outline-dark">
+            <i class="bi bi-arrow-left me-1"></i>
+            Reports Center
+        </a>
+
+        <a href="{% url 'estimated_profit_export' %}?date_from={{ date_from|date:'Y-m-d' }}&date_to={{ date_to|date:'Y-m-d' }}&group_by={{ group_by }}"
+           class="btn btn-success">
+            <i class="bi bi-file-earmark-excel me-1"></i>
+            Export Excel
+        </a>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3 align-items-end">
+
+            <div class="col-12 col-md-3">
+                <label class="form-label fw-semibold">Date From</label>
+                <input type="date"
+                       name="date_from"
+                       value="{{ date_from|date:'Y-m-d' }}"
+                       class="form-control">
+            </div>
+
+            <div class="col-12 col-md-3">
+                <label class="form-label fw-semibold">Date To</label>
+                <input type="date"
+                       name="date_to"
+                       value="{{ date_to|date:'Y-m-d' }}"
+                       class="form-control">
+            </div>
+
+            <div class="col-12 col-md-3">
+                <label class="form-label fw-semibold">Group By</label>
+                <select name="group_by" class="form-select">
+                    <option value="daily" {% if group_by == 'daily' %}selected{% endif %}>Daily</option>
+                    <option value="weekly" {% if group_by == 'weekly' %}selected{% endif %}>Weekly</option>
+                    <option value="monthly" {% if group_by == 'monthly' %}selected{% endif %}>Monthly</option>
+                </select>
+            </div>
+
+            <div class="col-12 col-md-3">
+                <button type="submit" class="btn btn-dark w-100">
+                    <i class="bi bi-funnel me-1"></i>
+                    Apply Filter
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Net Sales</p>
+                <h4 class="fw-bold mb-0">₱{{ summary.net_sales|floatformat:2 }}</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Product Cost</p>
+                <h4 class="fw-bold mb-0">₱{{ summary.product_cost|floatformat:2 }}</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Gross Profit</p>
+                <h4 class="fw-bold mb-0">₱{{ summary.gross_profit|floatformat:2 }}</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Estimated Net Profit</p>
+
+                {% if summary.estimated_net_profit >= 0 %}
+                    <h4 class="fw-bold mb-0 text-success">
+                        ₱{{ summary.estimated_net_profit|floatformat:2 }}
+                    </h4>
+                {% else %}
+                    <h4 class="fw-bold mb-0 text-danger">
+                        ₱{{ summary.estimated_net_profit|floatformat:2 }}
+                    </h4>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="row g-3 mb-4">
+
+    <div class="col-12 col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Orders</p>
+                <h5 class="fw-bold mb-0">{{ summary.order_count }}</h5>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Items Sold</p>
+                <h5 class="fw-bold mb-0">{{ summary.items_sold }}</h5>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Gross Profit Margin</p>
+                <h5 class="fw-bold mb-0">{{ summary.gross_profit_margin|floatformat:2 }}%</h5>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="alert alert-warning small">
+    <i class="bi bi-info-circle me-1"></i>
+    This is an estimated net profit report. It includes product cost and recorded cash payouts,
+    but it is not a final accounting profit because other expenses such as rent, utilities,
+    salaries, and supplier invoices may not yet be fully recorded in the system.
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-dark text-white">
+        <h5 class="mb-0">
+            <i class="bi bi-table me-1"></i>
+            Estimated Profit Table
+        </h5>
+    </div>
+
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Period</th>
+                        <th class="text-end">Orders</th>
+                        <th class="text-end">Items Sold</th>
+                        <th class="text-end">Gross Sales</th>
+                        <th class="text-end">Discounts</th>
+                        <th class="text-end">Net Sales</th>
+                        <th class="text-end">Product Cost</th>
+                        <th class="text-end">Gross Profit</th>
+                        <th class="text-end">Gross Profit Margin</th>
+                        <th class="text-end">Cash Payouts / Expenses</th>
+                        <th class="text-end">Estimated Net Profit</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for row in rows %}
+                    <tr>
+                        <td class="fw-semibold">{{ row.period_label }}</td>
+                        <td class="text-end">{{ row.order_count }}</td>
+                        <td class="text-end">{{ row.items_sold }}</td>
+                        <td class="text-end">₱{{ row.gross_sales|floatformat:2 }}</td>
+                        <td class="text-end text-danger">₱{{ row.total_discounts|floatformat:2 }}</td>
+                        <td class="text-end fw-semibold">₱{{ row.net_sales|floatformat:2 }}</td>
+                        <td class="text-end">₱{{ row.product_cost|floatformat:2 }}</td>
+
+                        <td class="text-end fw-bold">
+                            {% if row.gross_profit >= 0 %}
+                                <span class="text-success">₱{{ row.gross_profit|floatformat:2 }}</span>
+                            {% else %}
+                                <span class="text-danger">₱{{ row.gross_profit|floatformat:2 }}</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="text-end">{{ row.gross_profit_margin|floatformat:2 }}%</td>
+                        <td class="text-end text-danger">₱{{ row.cash_payouts|floatformat:2 }}</td>
+
+                        <td class="text-end fw-bold">
+                            {% if row.estimated_net_profit >= 0 %}
+                                <span class="text-success">₱{{ row.estimated_net_profit|floatformat:2 }}</span>
+                            {% else %}
+                                <span class="text-danger">₱{{ row.estimated_net_profit|floatformat:2 }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="11" class="text-center text-muted py-4">
+                            No profit data found for the selected date range.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+                {% if rows %}
+                <tfoot class="table-light">
+                    <tr class="fw-bold">
+                        <td>Total</td>
+                        <td class="text-end">{{ summary.order_count }}</td>
+                        <td class="text-end">{{ summary.items_sold }}</td>
+                        <td class="text-end">₱{{ summary.gross_sales|floatformat:2 }}</td>
+                        <td class="text-end text-danger">₱{{ summary.total_discounts|floatformat:2 }}</td>
+                        <td class="text-end">₱{{ summary.net_sales|floatformat:2 }}</td>
+                        <td class="text-end">₱{{ summary.product_cost|floatformat:2 }}</td>
+                        <td class="text-end text-success">₱{{ summary.gross_profit|floatformat:2 }}</td>
+                        <td class="text-end">{{ summary.gross_profit_margin|floatformat:2 }}%</td>
+                        <td class="text-end text-danger">₱{{ summary.cash_payouts|floatformat:2 }}</td>
+                        <td class="text-end text-success">₱{{ summary.estimated_net_profit|floatformat:2 }}</td>
+                    </tr>
+                </tfoot>
+                {% endif %}
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,183 @@
+Step 1: Create urls.py inside inventory
+
+
+Step: 2 inventory/urls.py
+
+from django.urls import path
+from .views import home, product, about
+
+urlpatterns = [
+    path('', home, name='home'),
+    path('product/', product, name='product'),
+    path('about/', about, name='about'),
+]
+
+
+Step 3: inventory/views.py
+
+from django.http import HttpResponse
+
+def home(request):
+    return HttpResponse("Home Page")
+
+def product(request):
+    return HttpResponse("Product Page")
+
+def about(request):
+    return HttpResponse("About Page")
+
+Step 4: DjangoCoffeeSystem/urls.py
+
+from django.contrib import admin
+from django.urls import path, include
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('', include('inventory.urls')),
+]
+
+Step 5: templates/home.html
+
+<h1>Welcome to Django Coffee System</h1>
+<p>This is the Home Page.</p>
+
+<a href="/product/">Go to Product Page</a>
+<br>
+<a href="/about/">Go to About Page</a>
+
+Step 6: inventory/templates/inventory/product.html
+
+
+<h1>Product Page</h1>
+<p>This page will display coffee shop products.</p>
+
+<a href="/">Back to Home</a>
+
+Step 7: inventory/templates/inventory/about.html
+
+<h1>About Page</h1>
+<p>This is a simple Django Coffee System.</p>
+
+<a href="/">Back to Home</a>
+
+
+Step 8: DjangoCoffeeSystem/settings.py
+Hanapin ito:
+
+'DIRS': [],
+
+Palitan ng:
+
+'DIRS': [BASE_DIR / 'templates'],
+'APP_DIRS': True,
+
+
+Step 9: inventory/views.py
+
+from django.shortcuts import render
+
+def home(request):
+    return render(request, 'home.html')
+
+def product(request):
+    return render(request, 'inventory/product.html')
+
+def about(request):
+    return render(request, 'inventory/about.html')
+
+Step 10: DjangoCoffeeSystem/settings.py
+
+Hanapin:
+
+INSTALLED_APPS = [
+
+Dapat idagdag mo ang 'inventory',
+
+INSTALLED_APPS = [
+    'inventory',
+
+
+Step 11: DjangoCoffeeSystem/static/css/styles.css
+h1 {
+    color: brown;
+}
+
+Step 12: DjangoCoffeeSystem/settings.py
+
+Hanapin ito:
+
+STATIC_URL = 'static/'
+
+So magiging ganito:
+
+STATIC_URL = 'static/'
+
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
+]
+
+
+
+Step 13: DjangoCoffeeSystem/templates/home.html
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Django Coffee System</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+    <h1>Welcome to Django Coffee System</h1>
+    <p>This is the Home Page.</p>
+
+    <a href="/product/">Go to Product Page</a>
+    <br>
+    <a href="/about/">Go to About Page</a>
+
+</body>
+</html>
+
+
+Step 14: inventory/templates/inventory/product.html
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Product Page</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+    <h1>Product Page</h1>
+    <p>This page will display coffee shop products.</p>
+
+    <a href="/">Back to Home</a>
+    <br>
+    <a href="/about/">Go to About Page</a>
+
+</body>
+</html>
+
+Step 15: 
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>About Page</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+    <h1>About Page</h1>
+    <p>This is a simple Django Coffee System.</p>
+
+    <a href="/">Back to Home</a>
+    <br>
+    <a href="/product/">Go to Product Page</a>
+
+</body>
+</html>

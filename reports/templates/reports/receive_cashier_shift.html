@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Receive Cashier Shift | Django Coffee System
+{% endblock %}
+
+{% block content %}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">Receive Cashier Shift</h2>
+        <p class="text-muted mb-0">
+            Confirm that the rendered cash drawer has been received and verified.
+        </p>
+    </div>
+
+    <div>
+        <a href="{% url 'cashier_shift_detail' shift.id %}" class="btn btn-outline-dark">
+            <i class="bi bi-arrow-left me-1"></i>
+            Back to Shift
+        </a>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-12 col-xl-8">
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-check2-circle me-1"></i>
+                    Manager / Owner Verification
+                </h5>
+            </div>
+
+            <div class="card-body">
+
+                <div class="row g-3 mb-4">
+                    <div class="col-12 col-md-6">
+                        <div class="border rounded p-3 h-100">
+                            <p class="text-muted mb-1">Cashier</p>
+                            <h5 class="fw-bold mb-0">{{ shift.cashier.username }}</h5>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <div class="border rounded p-3 h-100">
+                            <p class="text-muted mb-1">Shift Date</p>
+                            <h5 class="fw-bold mb-0">{{ shift.shift_start|date:"M d, Y" }}</h5>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-4">
+                        <div class="border rounded p-3 h-100">
+                            <p class="text-muted mb-1">Expected Cash</p>
+                            <h5 class="fw-bold mb-0">₱{{ shift.expected_cash|floatformat:2 }}</h5>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-4">
+                        <div class="border rounded p-3 h-100">
+                            <p class="text-muted mb-1">Actual Cash Counted</p>
+                            <h5 class="fw-bold mb-0">₱{{ shift.actual_cash_counted|floatformat:2 }}</h5>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-4">
+                        <div class="border rounded p-3 h-100">
+                            <p class="text-muted mb-1">Over / Short</p>
+
+                            {% if shift.over_short_amount > 0 %}
+                                <h5 class="fw-bold text-success mb-0">+₱{{ shift.over_short_amount|floatformat:2 }}</h5>
+                            {% elif shift.over_short_amount < 0 %}
+                                <h5 class="fw-bold text-danger mb-0">₱{{ shift.over_short_amount|floatformat:2 }}</h5>
+                            {% else %}
+                                <h5 class="fw-bold mb-0">₱{{ shift.over_short_amount|floatformat:2 }}</h5>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-warning small">
+                    <i class="bi bi-exclamation-triangle me-1"></i>
+                    By receiving this shift, you confirm that the cashier has rendered the cash drawer and that the amount has been checked.
+                </div>
+
+                <form method="POST">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">{{ form.manager_remarks.label }}</label>
+                        {{ form.manager_remarks }}
+
+                        {% if form.manager_remarks.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ form.manager_remarks.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{% url 'cashier_shift_detail' shift.id %}" class="btn btn-outline-secondary">
+                            Cancel
+                        </a>
+
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-check2-circle me-1"></i>
+                            Receive and Verify Shift
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

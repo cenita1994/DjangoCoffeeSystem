@@ -1,0 +1,291 @@
+Step 1: Create forms.py (inventory/forms.py)
+
+from django import forms
+from .models import Product
+
+class ProductForm(forms.ModelForm):
+    class Meta:
+        model = Product
+        fields = ['name', 'category', 'price', 'quantity', 'description']
+
+
+Step 2: Open inventory/views.py
+
+from django.shortcuts import render
+from .models import Product
+
+def home(request):
+    return render(request, 'home.html')
+
+def product(request):
+    products = Product.objects.all()
+    return render(request, 'inventory/product_list.html', {'products': products})
+
+def about(request):
+    return render(request, 'inventory/about.html')
+
+Step 3: inventory/templates/inventory/product_list.html
+
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Product List</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+    <h1>Product List</h1>
+
+    <a href="/">Back to Home</a>
+
+    <ul>
+        {% for product in products %}
+            <li>
+                {{ product.name }} - {{ product.category }} - ₱{{ product.price }} - Stock: {{ product.quantity }}
+            </li>
+        {% empty %}
+            <li>No products available.</li>
+        {% endfor %}
+    </ul>
+
+</body>
+</html>
+
+Step 4: Open inventory/views.py
+from django.shortcuts import render, redirect
+from .models import Product
+from .forms import ProductForm
+
+def home(request):
+    return render(request, 'home.html')
+
+def product(request):
+    products = Product.objects.all()
+    return render(request, 'inventory/product_list.html', {'products': products})
+
+def add_product(request):
+    form = ProductForm()
+
+    if request.method == 'POST':
+        form = ProductForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('product')
+
+    return render(request, 'inventory/product_form.html', {'form': form})
+
+def about(request):
+    return render(request, 'inventory/about.html')
+
+Step 5: Open inventory/urls.py
+from django.urls import path
+from .views import home, product, about, add_product
+
+urlpatterns = [
+    path('', home, name='home'),
+    path('product/', product, name='product'),
+    path('product/add/', add_product, name='add_product'),
+    path('about/', about, name='about'),
+]
+
+Step 6: inventory/templates/inventory/product_form.html
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Product</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+    <h1>Add Product</h1>
+
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <button type="submit">Save Product</button>
+    </form>
+
+    <br>
+
+    <a href="/product/">Back to Product List</a>
+
+</body>
+</html>
+
+Step 7: inventory/views.py (add)
+
+from django.shortcuts import render, redirect, get_object_or_404
+
+
+def edit_product(request, id):
+    product_item = get_object_or_404(Product, id=id)
+    form = ProductForm(instance=product_item)
+
+    if request.method == 'POST':
+        form = ProductForm(request.POST, instance=product_item)
+        if form.is_valid():
+            form.save()
+            return redirect('product')
+
+    return render(request, 'inventory/product_form.html', {'form': form})
+
+
+
+Step 8: inventory/urls.py
+
+from django.urls import path
+from .views import home, product, about, add_product, edit_product
+
+urlpatterns = [
+    path('', home, name='home'),
+    path('product/', product, name='product'),
+    path('product/add/', add_product, name='add_product'),
+    path('product/edit/<int:id>/', edit_product, name='edit_product'),
+    path('about/', about, name='about'),
+]
+
+Step 9: inventory/templates/inventory/product_list.html
+
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Product List</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+    <h1>Product List</h1>
+
+    <a href="/">Back to Home</a>
+    <br>
+    <a href="/product/add/">Add Product</a>
+
+    <hr>
+
+    <ul>
+        {% for product in products %}
+            <li>
+                {{ product.name }} - 
+                {{ product.category }} - 
+                ₱{{ product.price }} - 
+                Stock: {{ product.quantity }}
+
+                <br>
+
+                <a href="{% url 'edit_product' product.id %}">Edit</a>
+            </li>
+            <br>
+        {% empty %}
+            <li>No products available.</li>
+        {% endfor %}
+    </ul>
+
+</body>
+</html>
+
+Step 10: inventory/views.py (add)
+
+def delete_product(request, id):
+    product_item = get_object_or_404(Product, id=id)
+
+    if request.method == 'POST':
+        product_item.delete()
+        return redirect('product')
+
+    return render(request, 'inventory/delete.html', {'product': product_item})
+
+step 11: inventory/urls.py
+
+from django.urls import path
+from .views import home, product, about, add_product, edit_product, delete_product
+
+urlpatterns = [
+    path('', home, name='home'),
+    path('product/', product, name='product'),
+    path('product/add/', add_product, name='add_product'),
+    path('product/edit/<int:id>/', edit_product, name='edit_product'),
+    path('product/delete/<int:id>/', delete_product, name='delete_product'),
+    path('about/', about, name='about'),
+]
+
+
+step 12: inventory/templates/inventory/delete.html
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Delete Product</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+    <h1>Delete Product</h1>
+
+    <p>Are you sure you want to delete this product?</p>
+
+    <h3>{{ product.name }}</h3>
+
+    <form method="POST">
+        {% csrf_token %}
+        <button type="submit">Yes, Delete</button>
+    </form>
+
+    <br>
+
+    <a href="/product/">Cancel</a>
+
+</body>
+</html>
+
+Step 13: inventory/templates/inventory/product_list.html 
+
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Product List</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+    <h1>Product List</h1>
+
+    <a href="/">Back to Home</a>
+    <br>
+    <a href="/product/add/">Add Product</a>
+
+    <hr>
+
+    <ul>
+        {% for product in products %}
+            <li>
+                {{ product.name }} - 
+                {{ product.category }} - 
+                ₱{{ product.price }} - 
+                Stock: {{ product.quantity }}
+
+                <br>
+
+                <a href="{% url 'edit_product' product.id %}">Edit</a>
+                |
+                <a href="{% url 'delete_product' product.id %}">Delete</a>
+            </li>
+            <br>
+        {% empty %}
+            <li>No products available.</li>
+        {% endfor %}
+    </ul>
+
+</body>
+</html>
+
+

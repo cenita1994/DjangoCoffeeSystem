@@ -1,0 +1,192 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Ingredient Movements | Django Coffee System
+{% endblock %}
+
+{% block content %}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">Ingredient Movements</h2>
+        <p class="text-muted mb-0">
+            View ingredient stock-in, stock-out, and adjustment history.
+        </p>
+    </div>
+
+    <div class="d-flex gap-2 flex-wrap">
+        <a href="{% url 'ingredient_list' %}" class="btn btn-outline-dark">
+            <i class="bi bi-arrow-left me-1"></i>
+            Ingredients
+        </a>
+
+        <a href="{% url 'ingredient_stock_in' %}" class="btn btn-dark">
+            <i class="bi bi-box-arrow-in-down me-1"></i>
+            Stock In
+        </a>
+
+        <a href="{% url 'ingredient_adjustment' %}" class="btn btn-outline-dark">
+            <i class="bi bi-sliders me-1"></i>
+            Adjustment
+        </a>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3 align-items-end">
+            <div class="col-12 col-md-8">
+                <label class="form-label fw-semibold">Search Movement</label>
+                <input type="text"
+                       name="q"
+                       value="{{ search_query }}"
+                       class="form-control"
+                       placeholder="Search ingredient, reference, remarks, or user">
+            </div>
+
+            <div class="col-12 col-md-2">
+                <input type="hidden" name="type" value="{{ active_type }}">
+                <button type="submit" class="btn btn-dark w-100">
+                    <i class="bi bi-search me-1"></i>
+                    Search
+                </button>
+            </div>
+
+            <div class="col-12 col-md-2">
+                <a href="{% url 'ingredient_movement_list' %}" class="btn btn-outline-secondary w-100">
+                    Reset
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<ul class="nav nav-pills mb-4">
+    {% for tab in tabs %}
+        <li class="nav-item me-2 mb-2">
+            <a href="{% url 'ingredient_movement_list' %}?type={{ tab.name }}&q={{ search_query }}"
+               class="nav-link {% if active_type == tab.name %}active bg-dark{% else %}text-dark border{% endif %}">
+                <i class="bi {{ tab.icon }} me-1"></i>
+                {{ tab.name }}
+
+                <span class="badge {% if active_type == tab.name %}bg-light text-dark{% else %}bg-dark{% endif %} ms-1">
+                    {{ tab.count }}
+                </span>
+            </a>
+        </li>
+    {% endfor %}
+</ul>
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-dark text-white">
+        <h5 class="mb-0">
+            <i class="bi bi-clock-history me-1"></i>
+            Ingredient Movement History
+        </h5>
+    </div>
+
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Date</th>
+                        <th>Ingredient</th>
+                        <th>Type</th>
+                        <th class="text-end">Quantity</th>
+                        <th class="text-end">Previous</th>
+                        <th class="text-end">New</th>
+                        <th>Reference</th>
+                        <th>Performed By</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for movement in page_obj %}
+                    <tr>
+                        <td>{{ movement.movement_date|date:"M d, Y h:i A" }}</td>
+                        <td class="fw-semibold">{{ movement.ingredient.name }}</td>
+
+                        <td>
+                            {% if movement.movement_type == 'Stock In' %}
+                                <span class="badge bg-success">Stock In</span>
+                            {% elif movement.movement_type == 'Stock Out' %}
+                                <span class="badge bg-danger">Stock Out</span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark">Adjustment</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="text-end">
+                            {{ movement.quantity|floatformat:3 }} {{ movement.ingredient.unit }}
+                        </td>
+
+                        <td class="text-end">
+                            {{ movement.previous_quantity|floatformat:3 }}
+                        </td>
+
+                        <td class="text-end fw-semibold">
+                            {{ movement.new_quantity|floatformat:3 }}
+                        </td>
+
+                        <td>
+                            {% if movement.reference %}
+                                {{ movement.reference }}
+                            {% else %}
+                                <span class="text-muted">None</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if movement.performed_by %}
+                                {{ movement.performed_by.username }}
+                            {% else %}
+                                <span class="text-muted">System</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-4">
+                            No ingredient movements found.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if page_obj.has_other_pages %}
+        <nav class="mt-3">
+            <ul class="pagination justify-content-center mb-0">
+
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link text-dark"
+                       href="?type={{ active_type }}&q={{ search_query }}&page={{ page_obj.previous_page_number }}">
+                        Previous
+                    </a>
+                </li>
+                {% endif %}
+
+                <li class="page-item active">
+                    <span class="page-link bg-dark border-dark">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                    </span>
+                </li>
+
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link text-dark"
+                       href="?type={{ active_type }}&q={{ search_query }}&page={{ page_obj.next_page_number }}">
+                        Next
+                    </a>
+                </li>
+                {% endif %}
+
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Create Walk-in Order | Django Coffee System
+{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-7">
+
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-dark text-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-receipt me-1"></i>
+                    Create Walk-in Order
+                </h4>
+            </div>
+
+            <div class="card-body p-4">
+                <form method="POST">
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors }}
+                        </div>
+                    {% endif %}
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            Customer Account
+                        </label>
+
+                        {{ form.customer }}
+
+                        {% if form.customer.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ form.customer.errors }}
+                            </div>
+                        {% endif %}
+
+                        <div class="form-text">
+                            Search and select an existing customer account, if available.
+                        </div>
+                    </div>
+
+                    <div class="text-center my-3">
+                        <span class="badge bg-light text-dark border px-3 py-2">
+                            OR
+                        </span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            Walk-in Customer Name
+                        </label>
+
+                        {{ form.customer_name }}
+
+                        {% if form.customer_name.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ form.customer_name.errors }}
+                            </div>
+                        {% endif %}
+
+                        <div class="form-text">
+                            Use this if the customer does not have an account.
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info small mb-0">
+                        <i class="bi bi-info-circle me-1"></i>
+                        You only need to select a customer account or enter a walk-in customer name.
+                    </div>
+
+                    <div class="d-flex flex-column flex-sm-row justify-content-between gap-2 mt-4">
+                        <a href="{% url 'order_list' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>
+                            Back
+                        </a>
+
+                        <button type="submit" class="btn btn-dark">
+                            <i class="bi bi-plus-circle me-1"></i>
+                            Create Order
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

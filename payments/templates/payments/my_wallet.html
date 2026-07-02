@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block title %}
+My Wallet | Django Coffee System
+{% endblock %}
+
+{% block content %}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">My Wallet</h2>
+        <p class="text-muted mb-0">
+            View your current balance and recent wallet transactions.
+        </p>
+    </div>
+
+    <a href="{% url 'customer_menu' %}" class="btn btn-outline-dark">
+        <i class="bi bi-cup-hot me-1"></i>
+        Back to Menu
+    </a>
+</div>
+
+<div class="row g-4 mb-4">
+
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="card shadow-sm border-0 dashboard-card">
+            <div class="card-body p-4">
+                <i class="bi bi-wallet2 fs-1 text-warning"></i>
+                <h6 class="fw-bold mt-3">Current Balance</h6>
+                <h2 class="fw-bold mb-0">₱{{ wallet.balance }}</h2>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-dark text-white">
+        <h5 class="mb-0">
+            <i class="bi bi-clock-history me-1"></i>
+            Recent Transactions
+        </h5>
+    </div>
+
+    <div class="card-body">
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th>Method</th>
+                        <th>Reference No.</th>
+                        <th>Amount</th>
+                        <th>Previous Balance</th>
+                        <th>New Balance</th>
+                        <th>Remarks</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for transaction in transactions %}
+                    <tr>
+                        <td>{{ transaction.transaction_date|date:"M d, Y h:i A" }}</td>
+
+                        <td>
+                            {% if transaction.transaction_type == "Cash In" %}
+                                <span class="badge bg-success">Cash In</span>
+                            {% elif transaction.transaction_type == "Payment" %}
+                                <span class="badge bg-danger">Payment</span>
+                            {% elif transaction.transaction_type == "Refund" %}
+                                <span class="badge bg-info text-dark">Refund</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ transaction.transaction_type }}</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if transaction.payment_method %}
+                                {{ transaction.payment_method }}
+                            {% else %}
+                                <span class="text-muted">N/A</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if transaction.reference_number %}
+                                {{ transaction.reference_number }}
+                            {% else %}
+                                <span class="text-muted">N/A</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="fw-bold">₱{{ transaction.amount }}</td>
+
+                        <td>₱{{ transaction.previous_balance }}</td>
+
+                        <td>₱{{ transaction.new_balance }}</td>
+
+                        <td>
+                            {% if transaction.remarks %}
+                                {{ transaction.remarks }}
+                            {% else %}
+                                <span class="text-muted">No remarks</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-4">
+                            No wallet transactions yet.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <p class="text-muted small mt-3 mb-0">
+            To add balance, please cash in through the cashier.
+        </p>
+
+    </div>
+</div>
+
+{% endblock %}

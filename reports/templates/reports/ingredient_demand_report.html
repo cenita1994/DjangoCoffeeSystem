@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Ingredient Demand Report | Django Coffee System
+{% endblock %}
+
+{% block content %}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">Ingredient Demand Report</h2>
+        <p class="text-muted mb-0">
+            Estimate ingredient requirements based on paid product sales and product recipes.
+        </p>
+    </div>
+
+    <div class="d-flex gap-2 flex-wrap">
+        <a href="{% url 'reports_center' %}" class="btn btn-outline-dark">
+            <i class="bi bi-arrow-left me-1"></i>
+            Reports Center
+        </a>
+
+        <a href="{% url 'recipe_item_list' %}" class="btn btn-outline-dark">
+            <i class="bi bi-journal-text me-1"></i>
+            Manage Recipes
+        </a>
+        <a href="{% url 'ingredient_demand_export' %}?date_from={{ date_from|date:'Y-m-d' }}&date_to={{ date_to|date:'Y-m-d' }}"
+            class="btn btn-success">
+                <i class="bi bi-file-earmark-excel me-1"></i>
+                Export Excel
+        </a>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3 align-items-end">
+
+            <div class="col-12 col-md-4">
+                <label class="form-label fw-semibold">Date From</label>
+                <input type="date"
+                       name="date_from"
+                       value="{{ date_from|date:'Y-m-d' }}"
+                       class="form-control">
+            </div>
+
+            <div class="col-12 col-md-4">
+                <label class="form-label fw-semibold">Date To</label>
+                <input type="date"
+                       name="date_to"
+                       value="{{ date_to|date:'Y-m-d' }}"
+                       class="form-control">
+            </div>
+
+            <div class="col-12 col-md-2">
+                <button type="submit" class="btn btn-dark w-100">
+                    <i class="bi bi-funnel me-1"></i>
+                    Apply Filter
+                </button>
+            </div>
+
+            <div class="col-12 col-md-2">
+                <a href="{% url 'ingredient_demand_report' %}" class="btn btn-outline-secondary w-100">
+                    Reset
+                </a>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Products Sold</p>
+                <h4 class="fw-bold mb-0">{{ summary.product_count }}</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Recipe Items Used</p>
+                <h4 class="fw-bold mb-0">{{ summary.recipe_item_count }}</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Ingredients Needed</p>
+                <h4 class="fw-bold mb-0">{{ summary.ingredient_count }}</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Suggested Purchases</p>
+                <h4 class="fw-bold mb-0">{{ summary.total_suggested_purchase_items }}</h4>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="alert alert-info small">
+    <i class="bi bi-info-circle me-1"></i>
+    This report estimates ingredient needs using product sales multiplied by recipe requirements.
+    It includes each ingredient's safety buffer and compares the recommendation with current ingredient stock.
+</div>
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-dark text-white">
+        <h5 class="mb-0">
+            <i class="bi bi-box-seam me-1"></i>
+            Ingredient Recommendation Summary
+        </h5>
+    </div>
+
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Ingredient</th>
+                        <th>Unit</th>
+                        <th class="text-end">Estimated Used</th>
+                        <th class="text-end">Buffer Quantity</th>
+                        <th class="text-end">Recommended Quantity</th>
+                        <th class="text-end">Current Stock</th>
+                        <th class="text-end">Suggested Purchase</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for row in summary_rows %}
+                    <tr>
+                        <td class="fw-semibold">{{ row.ingredient.name }}</td>
+                        <td>{{ row.ingredient.unit }}</td>
+                        <td class="text-end">{{ row.estimated_used_quantity|floatformat:3 }}</td>
+                        <td class="text-end">{{ row.buffer_quantity|floatformat:3 }}</td>
+                        <td class="text-end fw-semibold">{{ row.recommended_quantity|floatformat:3 }}</td>
+                        <td class="text-end">{{ row.current_quantity|floatformat:3 }}</td>
+
+                        <td class="text-end fw-bold">
+                            {% if row.suggested_purchase_quantity > 0 %}
+                                <span class="text-danger">
+                                    {{ row.suggested_purchase_quantity|floatformat:3 }}
+                                </span>
+                            {% else %}
+                                <span class="text-success">0.000</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if row.suggested_purchase_quantity > 0 %}
+                                <span class="badge bg-warning text-dark">Restock Suggested</span>
+                            {% else %}
+                                <span class="badge bg-success">Enough Stock</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-4">
+                            No ingredient recommendation found. Check if there are paid orders and product recipes for the selected date range.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

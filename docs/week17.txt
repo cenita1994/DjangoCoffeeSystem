@@ -1,0 +1,31 @@
+mkdir DjangoCoffeeSystem
+
+cd DjangoCoffeeSystem
+
+python -m venv venv
+
+source venv/Scripts/activate
+
+pip install Django
+
+django-admin startproject DjangoCoffeeSystem .
+
+python manage.py startapp inventory
+
+
+Step 1: Open inventory/views.py
+from django.http import HttpResponse
+
+def home(request):
+    return HttpResponse("Welcome to Django Coffee System")
+
+
+Step 2: Open DjangoCoffeeSystem/urls.py
+from django.contrib import admin
+from django.urls import path
+from inventory.views import home
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('', home),
+]

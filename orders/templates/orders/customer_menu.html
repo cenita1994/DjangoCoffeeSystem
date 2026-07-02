@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Menu | Django Coffee System
+{% endblock %}
+
+{% block content %}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">Coffee Menu</h2>
+        <p class="text-muted mb-0">
+            Browse available products grouped by category. Select your preferred size before adding to cart.
+        </p>
+    </div>
+
+    <div class="d-flex gap-2 flex-wrap">
+        <a href="{% url 'cart' %}" class="btn btn-outline-dark">
+            <i class="bi bi-cart me-1"></i>
+            View Cart
+
+            {% if cart_count > 0 %}
+            <span class="badge bg-dark ms-1">{{ cart_count }}</span>
+            {% endif %}
+        </a>
+
+        <a href="{% url 'my_orders' %}" class="btn btn-dark">
+            <i class="bi bi-receipt me-1"></i>
+            My Orders
+        </a>
+    </div>
+</div>
+
+{% if grouped_products %}
+
+    {% for category_name, product_groups in grouped_products.items %}
+
+    <div class="d-flex align-items-center gap-2 mt-4 mb-3">
+        <div class="flex-grow-1 border-top"></div>
+
+        <span class="badge bg-dark px-3 py-2">
+            <i class="bi bi-tags me-1"></i>
+            {{ category_name }}
+        </span>
+
+        <div class="flex-grow-1 border-top"></div>
+    </div>
+
+    <div class="row g-4 mb-4">
+
+        {% for product_group in product_groups %}
+        <div class="col-12 col-sm-6 col-lg-4">
+            <div class="card h-100 shadow-sm border-0">
+
+                {% if product_group.image %}
+                <img src="{{ product_group.image.url }}"
+                     class="card-img-top"
+                     alt="{{ product_group.name }}"
+                     style="height: 190px; object-fit: contain; background-color: #f8f9fa;">
+                {% else %}
+                <div class="bg-light d-flex align-items-center justify-content-center"
+                     style="height: 190px;">
+                    <i class="bi bi-cup-hot display-4 text-muted"></i>
+                </div>
+                {% endif %}
+
+                <div class="card-body d-flex flex-column">
+
+                    <h5 class="fw-bold mb-2">
+                        {{ product_group.name }}
+                    </h5>
+
+                    {% if product_group.description %}
+                    <p class="text-muted small mb-3">
+                        {{ product_group.description|truncatechars:85 }}
+                    </p>
+                    {% else %}
+                    <p class="text-muted small mb-3">
+                        No description available.
+                    </p>
+                    {% endif %}
+
+                    <div class="mt-auto">
+
+                        <div class="small text-muted fw-semibold mb-2">
+                            Choose size:
+                        </div>
+
+                        <div class="d-grid gap-2">
+
+                            {% for variant in product_group.variants %}
+
+                                {% if variant.is_orderable %}
+                                <form method="POST" action="{% url 'add_to_cart' variant.id %}">
+                                    {% csrf_token %}
+
+                                    <button type="submit" class="btn btn-outline-dark w-100">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span>
+                                                {% if variant.size == "Not Applicable" %}
+                                                    Add to Cart
+                                                {% else %}
+                                                    {{ variant.size }}
+                                                {% endif %}
+                                            </span>
+
+                                            <span class="fw-bold">
+                                                ₱{{ variant.price|floatformat:2 }}
+                                            </span>
+                                        </div>
+
+                                        <div class="small text-muted text-start mt-1">
+                                            Available: {{ variant.available_servings }}
+                                        </div>
+                                    </button>
+                                </form>
+                                {% else %}
+                                <button class="btn btn-secondary w-100" disabled>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span>
+                                            {% if variant.size == "Not Applicable" %}
+                                                Out of Stock
+                                            {% else %}
+                                                {{ variant.size }}
+                                            {% endif %}
+                                        </span>
+
+                                        <span>
+                                            ₱{{ variant.price|floatformat:2 }}
+                                        </span>
+                                    </div>
+
+                                    <div class="small text-light text-start mt-1">
+                                        {{ variant.unavailable_reason|default:"Out of Stock" }}
+                                    </div>
+                                </button>
+                                {% endif %}
+
+                            {% endfor %}
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+    </div>
+
+    {% endfor %}
+
+{% else %}
+
+<div class="card shadow-sm border-0">
+    <div class="card-body text-center py-5">
+        <i class="bi bi-cup-hot display-4 text-muted"></i>
+        <h5 class="fw-bold mt-3">No products available</h5>
+        <p class="text-muted mb-0">
+            There are no menu items available at the moment.
+        </p>
+    </div>
+</div>
+
+{% endif %}
+
+{% endblock %}

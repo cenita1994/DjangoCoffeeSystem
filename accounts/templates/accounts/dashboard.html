@@ -1,0 +1,281 @@
+{% extends 'base.html' %}
+{% load role_tags %}
+
+{% block title %}
+Dashboard | Django Coffee System
+{% endblock %}
+
+{% block content %}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">Dashboard</h2>
+        <p class="text-muted mb-0">
+            Welcome, {{ user.username }}.
+            {% if user|is_owner_role %}
+                You are logged in as Owner.
+            {% elif user|is_manager_role %}
+                You are logged in as Manager.
+            {% elif user|is_cashier_role %}
+                You are logged in as Cashier.
+            {% elif user|is_customer_role %}
+                You are logged in as Customer.
+            {% else %}
+                You are logged in as User.
+            {% endif %}
+        </p>
+    </div>
+</div>
+
+{% if user|is_customer_role %}
+
+<div class="row g-4">
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <a href="{% url 'customer_menu' %}" class="text-decoration-none">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="fs-2 mb-2 text-dark">
+                        <i class="bi bi-cup-hot"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark">Menu</h5>
+                    <p class="text-muted mb-0">Browse products and add items to cart.</p>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <a href="{% url 'cart' %}" class="text-decoration-none">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="fs-2 mb-2 text-dark">
+                        <i class="bi bi-cart"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark">Cart</h5>
+                    <p class="text-muted mb-0">Review selected items before checkout.</p>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <a href="{% url 'my_orders' %}" class="text-decoration-none">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="fs-2 mb-2 text-dark">
+                        <i class="bi bi-receipt"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark">My Orders</h5>
+                    <p class="text-muted mb-0">Track your previous and current orders.</p>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <a href="{% url 'my_wallet' %}" class="text-decoration-none">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="fs-2 mb-2 text-dark">
+                        <i class="bi bi-wallet2"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark">My Wallet</h5>
+                    <p class="text-muted mb-0">View wallet balance and transactions.</p>
+                </div>
+            </div>
+        </a>
+    </div>
+
+</div>
+
+{% elif user|is_cashier_role %}
+
+<div class="row g-4">
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <a href="{% url 'cashier_shift_list' %}" class="text-decoration-none">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="fs-2 mb-2 text-dark">
+                        <i class="bi bi-cash-stack"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark">Cashier Shifts</h5>
+                    <p class="text-muted mb-0">Open, view, or close your cashier shift.</p>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <a href="{% url 'create_walkin_order' %}" class="text-decoration-none">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="fs-2 mb-2 text-dark">
+                        <i class="bi bi-bag-plus"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark">Walk-in Order</h5>
+                    <p class="text-muted mb-0">Create and process walk-in customer orders.</p>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <a href="{% url 'order_list' %}" class="text-decoration-none">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="fs-2 mb-2 text-dark">
+                        <i class="bi bi-receipt-cutoff"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark">Orders</h5>
+                    <p class="text-muted mb-0">View and manage customer orders.</p>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <a href="{% url 'cash_in' %}" class="text-decoration-none">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="fs-2 mb-2 text-dark">
+                        <i class="bi bi-wallet2"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark">Cash-in Wallet</h5>
+                    <p class="text-muted mb-0">Add customer wallet balance.</p>
+                </div>
+            </div>
+        </a>
+    </div>
+
+</div>
+
+{% elif user|is_manager_role or user|is_owner_role %}
+
+<div class="row g-4">
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <a href="{% url 'sales_dashboard' %}" class="text-decoration-none">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="fs-2 mb-2 text-dark">
+                        <i class="bi bi-bar-chart-line"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark">Sales Reports</h5>
+                    <p class="text-muted mb-0">View sales, payment methods, and product reports.</p>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <a href="{% url 'cashier_shift_list' %}" class="text-decoration-none">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="fs-2 mb-2 text-dark">
+                        <i class="bi bi-cash-stack"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark">Cashier Shifts</h5>
+                    <p class="text-muted mb-0">Audit cash drawer records and over/short amounts.</p>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <a href="{% url 'product' %}" class="text-decoration-none">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="fs-2 mb-2 text-dark">
+                        <i class="bi bi-cup-straw"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark">Products</h5>
+                    <p class="text-muted mb-0">Manage product menu and details.</p>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <a href="{% url 'category_list' %}" class="text-decoration-none">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="fs-2 mb-2 text-dark">
+                        <i class="bi bi-tags"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark">Categories</h5>
+                    <p class="text-muted mb-0">Manage product categories.</p>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <a href="{% url 'stock_list' %}" class="text-decoration-none">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="fs-2 mb-2 text-dark">
+                        <i class="bi bi-box-seam"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark">Stocks</h5>
+                    <p class="text-muted mb-0">Monitor product stock quantities.</p>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <a href="{% url 'stock_movement_list' %}" class="text-decoration-none">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="fs-2 mb-2 text-dark">
+                        <i class="bi bi-arrow-left-right"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark">Availability Movements</h5>
+                    <p class="text-muted mb-0">View stock-in, stock-out, and adjustments.</p>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <a href="{% url 'order_list' %}" class="text-decoration-none">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="fs-2 mb-2 text-dark">
+                        <i class="bi bi-receipt-cutoff"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark">Orders</h5>
+                    <p class="text-muted mb-0">View and manage all customer orders.</p>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <a href="{% url 'wallet_transaction_list' %}" class="text-decoration-none">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="fs-2 mb-2 text-dark">
+                        <i class="bi bi-wallet2"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark">Wallet Transactions</h5>
+                    <p class="text-muted mb-0">Review wallet cash-ins, payments, and refunds.</p>
+                </div>
+            </div>
+        </a>
+    </div>
+
+</div>
+
+{% else %}
+
+<div class="alert alert-info">
+    <i class="bi bi-info-circle me-1"></i>
+    No dashboard shortcuts available for your account role.
+</div>
+
+{% endif %}
+
+{% endblock %}

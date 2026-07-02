@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Delete Discount Rule | Django Coffee System
+{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6">
+
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-trash me-1"></i>
+                    Delete Discount Rule
+                </h4>
+            </div>
+
+            <div class="card-body p-4">
+                <p class="mb-2">Are you sure you want to delete this discount rule?</p>
+
+                <h5 class="fw-bold">{{ discount_rule.name }}</h5>
+
+                <p class="text-muted">
+                    Category: {{ discount_rule.category }} <br>
+                    Type: {{ discount_rule.discount_type }} <br>
+                    Value: {{ discount_rule.display_value }}
+                </p>
+
+                <div class="alert alert-warning">
+                    This action cannot be undone.
+                </div>
+
+                <form method="POST">
+                    {% csrf_token %}
+
+                    <div class="d-flex flex-column flex-sm-row justify-content-between gap-2">
+                        <a href="{% url 'discount_rule_list' %}" class="btn btn-secondary">
+                            Cancel
+                        </a>
+
+                        <button type="submit" class="btn btn-danger">
+                            Delete Discount Rule
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

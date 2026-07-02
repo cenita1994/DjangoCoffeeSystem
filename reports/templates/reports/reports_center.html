@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Reports Center | Django Coffee System
+{% endblock %}
+
+{% block content %}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">Reports Center</h2>
+        <p class="text-muted mb-0">
+            Access sales, profit, ingredient planning, product, payment, cashier, and shift reports.
+        </p>
+    </div>
+
+    <div>
+        <a href="{% url 'dashboard' %}" class="btn btn-outline-dark">
+            <i class="bi bi-arrow-left me-1"></i>
+            Dashboard
+        </a>
+    </div>
+</div>
+
+<div class="row g-4">
+
+    <div class="col-12 col-md-6 col-xl-4">
+        <a href="{% url 'sales_dashboard' %}" class="text-decoration-none">
+            <div class="card border-0 shadow-sm h-100 dashboard-card">
+                <div class="card-body p-4">
+                    <i class="bi bi-bar-chart-line fs-1 text-warning"></i>
+                    <h5 class="fw-bold mt-3 text-dark">Sales Overview</h5>
+                    <p class="text-muted small mb-3">
+                        Overall paid sales, payment methods, products sold, cashier sales, VAT, and inventory alerts.
+                    </p>
+                    <span class="btn btn-dark btn-sm">
+                        Open Overview
+                    </span>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-4">
+        <a href="{% url 'sales_period_report' %}" class="text-decoration-none">
+            <div class="card border-0 shadow-sm h-100 dashboard-card">
+                <div class="card-body p-4">
+                    <i class="bi bi-calendar3 fs-1 text-warning"></i>
+                    <h5 class="fw-bold mt-3 text-dark">Sales by Period</h5>
+                    <p class="text-muted small mb-3">
+                        View daily, weekly, or monthly sales with Excel export for business planning.
+                    </p>
+                    <span class="btn btn-dark btn-sm">
+                        Open Period Report
+                    </span>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-4">
+        <a href="{% url 'estimated_profit_report' %}" class="text-decoration-none">
+            <div class="card border-0 shadow-sm h-100 dashboard-card">
+                <div class="card-body p-4">
+                    <i class="bi bi-graph-up-arrow fs-1 text-warning"></i>
+                    <h5 class="fw-bold mt-3 text-dark">Estimated Profit Report</h5>
+                    <p class="text-muted small mb-3">
+                        View net sales, product cost, gross profit, cash payouts, and estimated net profit.
+                    </p>
+                    <span class="btn btn-dark btn-sm">
+                        Open Profit Report
+                    </span>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-4">
+        <a href="{% url 'ingredient_demand_report' %}" class="text-decoration-none">
+            <div class="card border-0 shadow-sm h-100 dashboard-card">
+                <div class="card-body p-4">
+                    <i class="bi bi-box-seam fs-1 text-warning"></i>
+                    <h5 class="fw-bold mt-3 text-dark">Ingredient Demand Report</h5>
+                    <p class="text-muted small mb-3">
+                        Estimate next-week ingredient needs using product sales, recipes, current stock, and safety buffer.
+                    </p>
+                    <span class="btn btn-dark btn-sm">
+                        Open Ingredient Report
+                    </span>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-4">
+        <a href="{% url 'product_sales_report' %}" class="text-decoration-none">
+            <div class="card border-0 shadow-sm h-100 dashboard-card">
+                <div class="card-body p-4">
+                    <i class="bi bi-cup-hot fs-1 text-warning"></i>
+                    <h5 class="fw-bold mt-3 text-dark">Product Sales</h5>
+                    <p class="text-muted small mb-3">
+                        View product-level sales, variants, product cost, estimated gross profit, and Excel export.
+                    </p>
+                    <span class="btn btn-dark btn-sm">
+                        Open Product Report
+                    </span>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-4">
+        <a href="{% url 'payment_method_report' %}" class="text-decoration-none">
+            <div class="card border-0 shadow-sm h-100 dashboard-card">
+                <div class="card-body p-4">
+                    <i class="bi bi-credit-card fs-1 text-warning"></i>
+                    <h5 class="fw-bold mt-3 text-dark">Payment Method Report</h5>
+                    <p class="text-muted small mb-3">
+                        Review sales grouped by Cash, GCash, Wallet, and other payment channels.
+                    </p>
+                    <span class="btn btn-dark btn-sm">
+                        Open Payment Report
+                    </span>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-4">
+        <a href="{% url 'cashier_sales_report' %}" class="text-decoration-none">
+            <div class="card border-0 shadow-sm h-100 dashboard-card">
+                <div class="card-body p-4">
+                    <i class="bi bi-person-badge fs-1 text-warning"></i>
+                    <h5 class="fw-bold mt-3 text-dark">Cashier Sales Report</h5>
+                    <p class="text-muted small mb-3">
+                        Review sales performance grouped by cashier with date range and Excel export.
+                    </p>
+                    <span class="btn btn-dark btn-sm">
+                        Open Cashier Report
+                    </span>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-4">
+        <a href="{% url 'cashier_shift_list' %}" class="text-decoration-none">
+            <div class="card border-0 shadow-sm h-100 dashboard-card">
+                <div class="card-body p-4">
+                    <i class="bi bi-cash-stack fs-1 text-warning"></i>
+                    <h5 class="fw-bold mt-3 text-dark">Cashier Shift Reports</h5>
+                    <p class="text-muted small mb-3">
+                        Review open and closed shifts, cash drawer computations, and over/short amounts.
+                    </p>
+                    <span class="btn btn-outline-dark btn-sm">
+                        View Shifts
+                    </span>
+                </div>
+            </div>
+        </a>
+    </div>
+
+</div>
+
+{% endblock %}

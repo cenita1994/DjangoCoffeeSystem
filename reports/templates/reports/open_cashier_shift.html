@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Open Cashier Shift | Django Coffee System
+{% endblock %}
+
+{% block content %}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">Open Cashier Shift</h2>
+        <p class="text-muted mb-0">
+            Start your shift by entering the opening cash in your drawer.
+        </p>
+    </div>
+
+    <div>
+        <a href="{% url 'cashier_shift_list' %}" class="btn btn-outline-dark">
+            <i class="bi bi-arrow-left me-1"></i>
+            Back to Shifts
+        </a>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-xl-6">
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-cash-stack me-1"></i>
+                    Opening Cash Drawer
+                </h5>
+            </div>
+
+            <div class="card-body">
+
+                <div class="alert alert-info small">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Opening cash is the starting physical cash in the cashier drawer before accepting sales and cash-ins.
+                </div>
+
+                <form method="POST">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            {{ form.opening_cash.label }}
+                        </label>
+                        {{ form.opening_cash }}
+
+                        {% if form.opening_cash.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ form.opening_cash.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{% url 'cashier_shift_list' %}" class="btn btn-outline-secondary">
+                            Cancel
+                        </a>
+
+                        <button type="submit" class="btn btn-dark">
+                            <i class="bi bi-play-circle me-1"></i>
+                            Open Shift
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,220 @@
+{% extends 'base.html' %}
+
+{% block title %}
+{{ title }} | Django Coffee System
+{% endblock %}
+
+{% block content %}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">{{ title }}</h2>
+        <p class="text-muted mb-0">
+            Update public website information shown to visitors and customers.
+        </p>
+    </div>
+
+    <div>
+        <a href="{% url 'site_page_list' %}" class="btn btn-outline-dark">
+            <i class="bi bi-arrow-left me-1"></i>
+            Back to Site Pages
+        </a>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-dark text-white">
+        <h5 class="mb-0">
+            <i class="bi bi-file-earmark-text me-1"></i>
+            Page Details
+        </h5>
+    </div>
+
+    <div class="card-body">
+        <form method="POST" enctype="multipart/form-data" id="sitePageForm">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <div class="row g-3">
+
+                <div class="col-12 col-lg-6">
+                    <label class="form-label fw-semibold">{{ form.title.label }}</label>
+                    {{ form.title }}
+                    {% if form.title.errors %}
+                        <div class="text-danger small mt-1">{{ form.title.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="col-12 col-lg-6">
+                    <label class="form-label fw-semibold">{{ form.subtitle.label }}</label>
+                    {{ form.subtitle }}
+                    {% if form.subtitle.errors %}
+                        <div class="text-danger small mt-1">{{ form.subtitle.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label fw-semibold">Content</label>
+
+                    <div class="border rounded-top bg-light p-2 d-flex flex-wrap gap-2">
+                        <button type="button" class="btn btn-sm btn-outline-dark" onclick="formatSitePageText('bold')">
+                            <strong>B</strong>
+                        </button>
+
+                        <button type="button" class="btn btn-sm btn-outline-dark" onclick="formatSitePageText('italic')">
+                            <em>I</em>
+                        </button>
+
+                        <button type="button" class="btn btn-sm btn-outline-dark" onclick="formatSitePageText('underline')">
+                            <u>U</u>
+                        </button>
+
+                        <button type="button" class="btn btn-sm btn-outline-dark" onclick="formatSitePageText('insertUnorderedList')">
+                            <i class="bi bi-list-ul"></i>
+                        </button>
+
+                        <select class="form-select form-select-sm w-auto" onchange="changeSitePageFontSize(this.value)">
+                            <option value="">Font Size</option>
+                            <option value="2">Small</option>
+                            <option value="3">Normal</option>
+                            <option value="5">Large</option>
+                            <option value="7">Extra Large</option>
+                        </select>
+
+                        <button type="button" class="btn btn-sm btn-outline-dark" onclick="addSitePageLink()">
+                            <i class="bi bi-link-45deg"></i>
+                            Link
+                        </button>
+                    </div>
+
+                    <div id="sitePageEditor"
+                         class="form-control rounded-top-0"
+                         contenteditable="true"
+                         style="min-height: 220px; overflow-y: auto;">
+                        {{ form.content.value|default_if_none:""|safe }}
+                    </div>
+
+                    {{ form.content }}
+
+                    {% if form.content.errors %}
+                        <div class="text-danger small mt-1">{{ form.content.errors }}</div>
+                    {% endif %}
+
+                    <div class="form-text">
+                        You may use bold, italic, underline, bullet list, font size, and links.
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label fw-semibold">{{ form.image.label }}</label>
+                    {{ form.image }}
+
+                    {% if form.instance.image %}
+                    <div class="mt-2">
+                        <img src="{{ form.instance.image.url }}"
+                             alt="Current page image"
+                             class="img-fluid rounded border"
+                             style="max-height: 240px; object-fit: contain;">
+                    </div>
+                    {% endif %}
+
+                    {% if form.image.errors %}
+                        <div class="text-danger small mt-1">{{ form.image.errors }}</div>
+                    {% endif %}
+
+                    <div class="form-text">
+                        Optional. Upload an image/banner for this public page.
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <hr>
+                    <h6 class="fw-bold mb-0">Contact Page Details</h6>
+                    <p class="text-muted small mb-0">
+                        These fields are mainly used for the Contact Us page. You may leave them blank for About Us.
+                    </p>
+                </div>
+
+                <div class="col-12 col-lg-6">
+                    <label class="form-label fw-semibold">{{ form.location.label }}</label>
+                    {{ form.location }}
+                </div>
+
+                <div class="col-12 col-lg-6">
+                    <label class="form-label fw-semibold">{{ form.contact_number.label }}</label>
+                    {{ form.contact_number }}
+                </div>
+
+                <div class="col-12 col-lg-6">
+                    <label class="form-label fw-semibold">{{ form.email.label }}</label>
+                    {{ form.email }}
+                </div>
+
+                <div class="col-12 col-lg-6">
+                    <label class="form-label fw-semibold">{{ form.store_hours.label }}</label>
+                    {{ form.store_hours }}
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label fw-semibold">{{ form.map_url.label }}</label>
+                    {{ form.map_url }}
+                </div>
+
+                <div class="col-12">
+                    <div class="form-check">
+                        {{ form.is_active }}
+                        <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                            Active page
+                        </label>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 mt-4">
+                <a href="{% url 'site_page_list' %}" class="btn btn-outline-secondary">
+                    Cancel
+                </a>
+
+                <button type="submit" class="btn btn-dark">
+                    <i class="bi bi-save me-1"></i>
+                    {{ button_label }}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function formatSitePageText(command) {
+        document.execCommand(command, false, null);
+        document.getElementById('sitePageEditor').focus();
+    }
+
+    function changeSitePageFontSize(size) {
+        if (size) {
+            document.execCommand('fontSize', false, size);
+            document.getElementById('sitePageEditor').focus();
+        }
+    }
+
+    function addSitePageLink() {
+        const url = prompt('Enter link URL:');
+
+        if (url) {
+            document.execCommand('createLink', false, url);
+            document.getElementById('sitePageEditor').focus();
+        }
+    }
+
+    document.getElementById('sitePageForm').addEventListener('submit', function () {
+        document.getElementById('id_content').value = document.getElementById('sitePageEditor').innerHTML.trim();
+    });
+</script>
+
+{% endblock %}

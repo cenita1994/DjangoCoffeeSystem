@@ -1,0 +1,287 @@
+<style>
+    .floating-chat-button {
+        position: fixed;
+        right: 24px;
+        bottom: 24px;
+        z-index: 1050;
+        border-radius: 50%;
+        width: 58px;
+        height: 58px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    }
+
+    .floating-chat-box {
+        position: fixed;
+        right: 24px;
+        bottom: 92px;
+        width: 360px;
+        max-width: calc(100vw - 48px);
+        height: 520px;
+        max-height: calc(100vh - 130px);
+        z-index: 1050;
+        display: none;
+        overflow: hidden;
+    }
+
+    .floating-chat-messages {
+        height: 355px;
+        overflow-y: auto;
+        background: #f8f9fa;
+    }
+
+    .floating-message-user {
+        background: #0d6efd;
+        color: white;
+        border-radius: 16px 16px 4px 16px;
+        padding: 8px 12px;
+        max-width: 82%;
+        white-space: pre-line;
+    }
+
+    .floating-message-assistant {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 16px 16px 16px 4px;
+        padding: 8px 12px;
+        max-width: 88%;
+        white-space: pre-line;
+    }
+
+    @media (max-width: 576px) {
+        .floating-chat-box {
+            right: 12px;
+            bottom: 82px;
+            width: calc(100vw - 24px);
+            height: 500px;
+        }
+
+        .floating-chat-button {
+            right: 16px;
+            bottom: 16px;
+        }
+    }
+</style>
+
+<button type="button" id="floatingChatToggle" class="btn btn-dark floating-chat-button">
+    <i class="bi bi-chat-dots fs-4"></i>
+</button>
+
+<div id="floatingChatBox" class="card shadow border-0 floating-chat-box">
+    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+        <div class="fw-bold">
+            <i class="bi bi-chat-dots me-1"></i>
+            Smart Assistant
+        </div>
+
+        <div class="d-flex gap-1">
+            <button type="button" id="floatingChatClear" class="btn btn-sm btn-outline-light">
+                Clear
+            </button>
+
+            <button type="button" id="floatingChatClose" class="btn btn-sm btn-outline-light">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+    </div>
+
+    <div id="floatingChatMessages" class="card-body floating-chat-messages">
+        <div class="d-flex mb-2">
+            <div class="floating-message-assistant">
+                Hello! Ask me about products, prices, availability, best sellers, and ingredients.
+            </div>
+        </div>
+    </div>
+
+    <div class="card-footer bg-white">
+        <form id="floatingChatForm">
+            {% csrf_token %}
+
+            <div class="input-group">
+                <input type="text"
+                       id="floatingChatInput"
+                       name="question"
+                       class="form-control"
+                       placeholder="Ask about the menu..."
+                       autocomplete="off">
+
+                <button type="submit" class="btn btn-dark">
+                    <i class="bi bi-send"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const toggleButton = document.getElementById('floatingChatToggle');
+    const chatBox = document.getElementById('floatingChatBox');
+    const closeButton = document.getElementById('floatingChatClose');
+    const clearButton = document.getElementById('floatingChatClear');
+    const chatMessages = document.getElementById('floatingChatMessages');
+    const chatForm = document.getElementById('floatingChatForm');
+    const chatInput = document.getElementById('floatingChatInput');
+
+    let historyLoaded = false;
+
+    function getCsrfToken() {
+        const tokenInput = chatForm.querySelector('input[name="csrfmiddlewaretoken"]');
+        return tokenInput ? tokenInput.value : '';
+    }
+
+    function scrollToBottom() {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function appendMessage(sender, message) {
+        const wrapper = document.createElement('div');
+        wrapper.className = sender === 'user'
+            ? 'd-flex justify-content-end mb-2'
+            : 'd-flex mb-2';
+
+        const bubble = document.createElement('div');
+        bubble.className = sender === 'user'
+            ? 'floating-message-user'
+            : 'floating-message-assistant';
+
+        bubble.textContent = message;
+
+        wrapper.appendChild(bubble);
+        chatMessages.appendChild(wrapper);
+
+        scrollToBottom();
+    }
+
+    function resetGreeting() {
+        chatMessages.innerHTML = '';
+
+        appendMessage(
+            'assistant',
+            'Hello! Ask me about products, prices, availability, best sellers, and ingredients.'
+        );
+    }
+
+    function loadHistory() {
+        if (historyLoaded) {
+            return;
+        }
+
+        fetch("{% url 'menu_assistant_history_api' %}")
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.chat_history && data.chat_history.length > 0) {
+                    resetGreeting();
+
+                    data.chat_history.forEach(item => {
+                        appendMessage(item.sender, item.message);
+                    });
+                }
+
+                historyLoaded = true;
+                scrollToBottom();
+            })
+            .catch(() => {
+                historyLoaded = true;
+            });
+    }
+
+    toggleButton.addEventListener('click', function () {
+        if (chatBox.style.display === 'block') {
+            chatBox.style.display = 'none';
+        } else {
+            chatBox.style.display = 'block';
+            loadHistory();
+
+            setTimeout(function () {
+                chatInput.focus();
+                scrollToBottom();
+            }, 100);
+        }
+    });
+
+    closeButton.addEventListener('click', function () {
+        chatBox.style.display = 'none';
+    });
+
+    clearButton.addEventListener('click', function () {
+        const formData = new FormData();
+
+        fetch("{% url 'clear_menu_assistant_api' %}", {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCsrfToken()
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                resetGreeting();
+                historyLoaded = true;
+            }
+        });
+    });
+
+    chatForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const question = chatInput.value.trim();
+
+        if (!question) {
+            return;
+        }
+
+        appendMessage('user', question);
+        chatInput.value = '';
+
+        const thinkingWrapper = document.createElement('div');
+        thinkingWrapper.className = 'd-flex mb-2';
+        thinkingWrapper.id = 'floatingThinkingMessage';
+
+        const thinkingBubble = document.createElement('div');
+        thinkingBubble.className = 'floating-message-assistant text-muted';
+        thinkingBubble.textContent = 'Typing...';
+
+        thinkingWrapper.appendChild(thinkingBubble);
+        chatMessages.appendChild(thinkingWrapper);
+        scrollToBottom();
+
+        const formData = new FormData();
+        formData.append('question', question);
+
+        fetch("{% url 'menu_assistant_api' %}", {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCsrfToken()
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            const thinkingMessage = document.getElementById('floatingThinkingMessage');
+
+            if (thinkingMessage) {
+                thinkingMessage.remove();
+            }
+
+            if (data.success) {
+                appendMessage('assistant', data.answer);
+            } else {
+                appendMessage('assistant', data.answer || 'Sorry, something went wrong.');
+            }
+        })
+        .catch(() => {
+            const thinkingMessage = document.getElementById('floatingThinkingMessage');
+
+            if (thinkingMessage) {
+                thinkingMessage.remove();
+            }
+
+            appendMessage('assistant', 'Sorry, I could not process your message right now.');
+        });
+    });
+});
+</script>

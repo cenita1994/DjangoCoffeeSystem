@@ -1,0 +1,248 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Owner Dashboard | Django Coffee System
+{% endblock %}
+
+{% block content %}
+
+<div class="row g-4">
+
+
+<div class="col-12">
+    <div class="p-4 bg-light rounded shadow-sm">
+        <h2 class="fw-bold mb-1">Owner Dashboard</h2>
+        <p class="text-muted mb-0">
+            Welcome, {{ request.user.first_name|default:request.user.username }}.
+            You have full access to orders, reports, cashier shifts, inventory, stocks, and employee accounts.
+        </p>
+    </div>
+</div>
+
+{% include 'accounts/partials/employee_announcements.html' %}
+
+<!-- Summary Cards -->
+<div class="col-12 col-md-6 col-xl-2">
+    <div class="card border-0 shadow-sm h-100 dashboard-card">
+        <div class="card-body p-4">
+            <i class="bi bi-hourglass-split fs-1 text-warning"></i>
+            <h6 class="fw-bold mt-3">Pending</h6>
+            <h2 class="fw-bold">{{ pending_orders }}</h2>
+            <a href="{% url 'order_list' %}?status=Pending" class="btn btn-sm btn-outline-dark">
+                View
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="col-12 col-md-6 col-xl-2">
+    <div class="card border-0 shadow-sm h-100 dashboard-card">
+        <div class="card-body p-4">
+            <i class="bi bi-cup-hot fs-1 text-warning"></i>
+            <h6 class="fw-bold mt-3">Preparing</h6>
+            <h2 class="fw-bold">{{ preparing_orders }}</h2>
+            <a href="{% url 'order_list' %}?status=Preparing" class="btn btn-sm btn-outline-dark">
+                View
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="col-12 col-md-6 col-xl-2">
+    <div class="card border-0 shadow-sm h-100 dashboard-card">
+        <div class="card-body p-4">
+            <i class="bi bi-check-circle fs-1 text-warning"></i>
+            <h6 class="fw-bold mt-3">Ready</h6>
+            <h2 class="fw-bold">{{ ready_orders }}</h2>
+            <a href="{% url 'order_list' %}?status=Ready" class="btn btn-sm btn-outline-dark">
+                View
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="col-12 col-md-6 col-xl-2">
+    <div class="card border-0 shadow-sm h-100 dashboard-card">
+        <div class="card-body p-4">
+            <i class="bi bi-exclamation-triangle fs-1 text-warning"></i>
+            <h6 class="fw-bold mt-3">Low Stock</h6>
+            <h2 class="fw-bold">{{ low_stock_products }}</h2>
+            <a href="{% url 'stock_list' %}" class="btn btn-sm btn-outline-dark">
+                View
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="col-12 col-md-6 col-xl-2">
+    <div class="card border-0 shadow-sm h-100 dashboard-card">
+        <div class="card-body p-4">
+            <i class="bi bi-cup-straw fs-1 text-warning"></i>
+            <h6 class="fw-bold mt-3">Products</h6>
+            <h2 class="fw-bold">{{ total_products }}</h2>
+            <a href="{% url 'product' %}" class="btn btn-sm btn-outline-dark">
+                View
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="col-12 col-md-6 col-xl-2">
+    <div class="card border-0 shadow-sm h-100 dashboard-card">
+        <div class="card-body p-4">
+            <i class="bi bi-people fs-1 text-warning"></i>
+            <h6 class="fw-bold mt-3">Users</h6>
+            <h2 class="fw-bold">{{ total_users }}</h2>
+            <a href="{% url 'account_list' %}" class="btn btn-sm btn-outline-dark">
+                View
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Main Shortcuts -->
+<div class="col-12">
+    <h5 class="fw-bold mt-2 mb-0">Management Shortcuts</h5>
+    <p class="text-muted mb-0">Quick access to owner-level system modules.</p>
+</div>
+
+<div class="col-12 col-md-6 col-xl-3">
+    <a href="{% url 'sales_dashboard' %}" class="text-decoration-none">
+        <div class="card border-0 shadow-sm h-100 dashboard-card">
+            <div class="card-body p-4">
+                <i class="bi bi-bar-chart-line fs-1 text-warning"></i>
+                <h5 class="fw-bold mt-3 text-dark">Sales Reports</h5>
+                <p class="text-muted small mb-3">
+                    View sales, payment methods, products sold, and cashier sales.
+                </p>
+                <span class="btn btn-dark btn-sm">
+                    Open Report
+                </span>
+            </div>
+        </div>
+    </a>
+</div>
+
+<div class="col-12 col-md-6 col-xl-3">
+    <a href="{% url 'cashier_shift_list' %}" class="text-decoration-none">
+        <div class="card border-0 shadow-sm h-100 dashboard-card">
+            <div class="card-body p-4">
+                <i class="bi bi-cash-stack fs-1 text-warning"></i>
+                <h5 class="fw-bold mt-3 text-dark">Cashier Shifts</h5>
+                <p class="text-muted small mb-3">
+                    Review open and closed shifts, expected cash, actual cash, and over/short.
+                </p>
+                <span class="btn btn-dark btn-sm">
+                    View Shifts
+                </span>
+            </div>
+        </div>
+    </a>
+</div>
+
+<div class="col-12 col-md-6 col-xl-3">
+    <a href="{% url 'order_list' %}" class="text-decoration-none">
+        <div class="card border-0 shadow-sm h-100 dashboard-card">
+            <div class="card-body p-4">
+                <i class="bi bi-receipt-cutoff fs-1 text-warning"></i>
+                <h5 class="fw-bold mt-3 text-dark">Orders</h5>
+                <p class="text-muted small mb-3">
+                    View and manage customer and walk-in orders.
+                </p>
+                <span class="btn btn-outline-dark btn-sm">
+                    View Orders
+                </span>
+            </div>
+        </div>
+    </a>
+</div>
+
+<div class="col-12 col-md-6 col-xl-3">
+    <a href="{% url 'create_walkin_order' %}" class="text-decoration-none">
+        <div class="card border-0 shadow-sm h-100 dashboard-card">
+            <div class="card-body p-4">
+                <i class="bi bi-bag-plus fs-1 text-warning"></i>
+                <h5 class="fw-bold mt-3 text-dark">Walk-in</h5>
+                <p class="text-muted small mb-3">
+                    Create counter orders for walk-in customers.
+                </p>
+                <span class="btn btn-outline-dark btn-sm">
+                    Create Order
+                </span>
+            </div>
+        </div>
+    </a>
+</div>
+
+<div class="col-12 col-md-6 col-xl-3">
+    <a href="{% url 'product' %}" class="text-decoration-none">
+        <div class="card border-0 shadow-sm h-100 dashboard-card">
+            <div class="card-body p-4">
+                <i class="bi bi-cup-hot fs-1 text-warning"></i>
+                <h5 class="fw-bold mt-3 text-dark">Products</h5>
+                <p class="text-muted small mb-3">
+                    Manage coffee products, menu items, prices, and product details.
+                </p>
+                <span class="btn btn-outline-dark btn-sm">
+                    Manage Products
+                </span>
+            </div>
+        </div>
+    </a>
+</div>
+
+<div class="col-12 col-md-6 col-xl-3">
+    <a href="{% url 'stock_list' %}" class="text-decoration-none">
+        <div class="card border-0 shadow-sm h-100 dashboard-card">
+            <div class="card-body p-4">
+                <i class="bi bi-box-seam fs-1 text-warning"></i>
+                <h5 class="fw-bold mt-3 text-dark">Stocks</h5>
+                <p class="text-muted small mb-3">
+                    Monitor and manage available product stock levels.
+                </p>
+                <span class="btn btn-outline-dark btn-sm">
+                    Manage Stocks
+                </span>
+            </div>
+        </div>
+    </a>
+</div>
+
+<div class="col-12 col-md-6 col-xl-3">
+    <a href="{% url 'account_list' %}" class="text-decoration-none">
+        <div class="card border-0 shadow-sm h-100 dashboard-card">
+            <div class="card-body p-4">
+                <i class="bi bi-people fs-1 text-warning"></i>
+                <h5 class="fw-bold mt-3 text-dark">Accounts</h5>
+                <p class="text-muted small mb-3">
+                    View and manage employee user accounts and roles.
+                </p>
+                <span class="btn btn-outline-dark btn-sm">
+                    View Accounts
+                </span>
+            </div>
+        </div>
+    </a>
+</div>
+
+<div class="col-12 col-md-6 col-xl-3">
+    <a href="{% url 'create_account' %}" class="text-decoration-none">
+        <div class="card border-0 shadow-sm h-100 dashboard-card">
+            <div class="card-body p-4">
+                <i class="bi bi-person-plus fs-1 text-warning"></i>
+                <h5 class="fw-bold mt-3 text-dark">Create User</h5>
+                <p class="text-muted small mb-3">
+                    Add cashier, manager, or owner staff accounts.
+                </p>
+                <span class="btn btn-outline-dark btn-sm">
+                    Create Account
+                </span>
+            </div>
+        </div>
+    </a>
+</div>
+
+
+</div>
+
+{% endblock %}

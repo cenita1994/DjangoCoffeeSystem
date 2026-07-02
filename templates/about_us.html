@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block title %}
+About Us | Django Coffee System
+{% endblock %}
+
+{% block content %}
+
+<section class="p-4 p-md-5 bg-light rounded shadow-sm mb-4">
+    <div class="row align-items-center g-4">
+        <div class="col-12 col-lg-7">
+            <span class="badge bg-dark px-3 py-2 mb-3">
+                <i class="bi bi-cup-hot me-1"></i>
+                {% if page and page.subtitle %}
+                    {{ page.subtitle }}
+                {% else %}
+                    About Our Coffee Shop
+                {% endif %}
+            </span>
+
+            <h1 class="fw-bold mb-3">
+                {% if page %}
+                    {{ page.title }}
+                {% else %}
+                    Serving coffee, comfort, and convenience.
+                {% endif %}
+            </h1>
+
+            <div class="text-muted lead mb-0">
+                {% if page %}
+                    {{ page.content|safe }}
+                {% else %}
+                    Django Coffee System is a sample coffee shop ordering and inventory platform designed to support
+                    smoother customer ordering, cashier-assisted transactions, product monitoring, and business reporting.
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-5">
+            <div class="card border-0 shadow-sm overflow-hidden">
+                {% if page and page.image %}
+                    <img src="{{ page.image.url }}"
+                         alt="About Us image"
+                         class="img-fluid w-100"
+                         style="max-height: 320px; object-fit: cover;">
+                {% else %}
+                    <div class="card-body p-4 text-center">
+                        <i class="bi bi-cup-hot display-3 text-warning"></i>
+                        <h4 class="fw-bold mt-3">Django Coffee System</h4>
+                        <p class="text-muted mb-0">
+                            A modern coffee shop system for menu browsing, ordering, inventory, forecasting, and management support.
+                        </p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="row g-4">
+
+    <div class="col-12 col-md-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body p-4">
+                <i class="bi bi-bag-check fs-1 text-warning"></i>
+                <h5 class="fw-bold mt-3">Customer-Friendly Ordering</h5>
+                <p class="text-muted mb-0">
+                    Customers can browse available products, view prices and sizes, create an account, and place orders online.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body p-4">
+                <i class="bi bi-box-seam fs-1 text-warning"></i>
+                <h5 class="fw-bold mt-3">Inventory Monitoring</h5>
+                <p class="text-muted mb-0">
+                    Managers and owners can monitor products, stocks, ingredients, recipes, and ingredient demand recommendations.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body p-4">
+                <i class="bi bi-graph-up-arrow fs-1 text-warning"></i>
+                <h5 class="fw-bold mt-3">Business Insights</h5>
+                <p class="text-muted mb-0">
+                    The system provides reports, estimated profit, demand forecasting, product performance, and cashier sales monitoring.
+                </p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

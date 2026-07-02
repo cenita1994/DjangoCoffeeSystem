@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+
+{% block title %}Audit Trail
+{% if page_obj.has_other_pages %}
+<nav class="mt-3">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="{{ page_url_prefix }}page={{ page_obj.previous_page_number }}">Previous</a>
+        </li>
+        {% endif %}
+
+        <li class="page-item disabled">
+            <span class="page-link">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+        </li>
+
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="{{ page_url_prefix }}page={{ page_obj.next_page_number }}">Next</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+{% endblock %}
+
+{% block content %}
+
+<h2 class="mb-3">
+    <i class="bi bi-shield-check me-1"></i>
+    Audit Trail
+</h2>
+
+<p class="text-muted">
+    Total records: {{ total_logs }}
+</p>
+
+
+<div class="card shadow-sm border-0 mb-3">
+    <div class="card-body">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label">Search</label>
+                <input type="text" name="q" class="form-control" value="{{ search_query }}" placeholder="Search logs...">
+            </div>
+
+
+            <div class="col-md-2">
+                <label class="form-label">Account Type</label>
+                <select name="account_type" class="form-select">
+                    <option value="">All Accounts</option>
+                    <option value="employees" {% if account_type == 'employees' %}selected{% endif %}>Employees only</option>
+                    <option value="customers" {% if account_type == 'customers' %}selected{% endif %}>Customers only</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Employee User</label>
+                <select name="user" class="form-select">
+                    <option value="">All Users</option>
+                    {% for username in usernames %}
+                    <option value="{{ username }}" {% if user_filter == username %}selected{% endif %}>{{ username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Role</label>
+                <select name="role" class="form-select">
+                    <option value="">All Roles</option>
+                    {% for role in roles %}
+                    <option value="{{ role }}" {% if role_filter == role %}selected{% endif %}>{{ role }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Action</label>
+                <select name="action" class="form-select">
+                    <option value="">All Actions</option>
+                    {% for value, label in action_choices %}
+                    <option value="{{ value }}" {% if action_filter == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label">Module</label>
+                <select name="module" class="form-select">
+                    <option value="">All Modules</option>
+                    {% for value, label in module_choices %}
+                    <option value="{{ value }}" {% if module_filter == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Date From</label>
+                <input type="date" name="date_from" class="form-control" value="{{ date_from }}">
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Date To</label>
+                <input type="date" name="date_to" class="form-control" value="{{ date_to }}">
+            </div>
+
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-dark">
+                    <i class="bi bi-funnel me-1"></i> Filter
+                </button>
+                <a href="{% url 'audit_log_list' %}" class="btn btn-outline-secondary">
+                    Reset
+                </a>
+                <a href="{% url 'export_audit_logs' %}{% if export_query_string %}?{{ export_query_string }}{% endif %}" class="btn btn-success">
+                    <i class="bi bi-download me-1"></i> Export CSV
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Date/Time</th>
+                        <th>User</th>
+                        <th>Role</th>
+                        <th>Action</th>
+                        <th>Module</th>
+                        <th>Description</th>
+                        <th>IP</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs %}
+                    <tr>
+                        <td>{{ log.created_at|date:"M d, Y h:i A" }}</td>
+                        <td>{{ log.username|default:"Anonymous" }}</td>
+                        <td>{{ log.role|default:"N/A" }}</td>
+                        <td>{{ log.action }}</td>
+                        <td>{{ log.module }}</td>
+                        <td>{{ log.description }}</td>
+                        <td>{{ log.ip_address|default:"N/A" }}</td>
+                        <td><span title="{{ log.user_agent|default:'N/A' }}">{{ log.user_agent|default:"N/A"|truncatechars:45 }}</span></td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-4">
+                            No audit logs found yet.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+{% if page_obj.has_other_pages %}
+<nav class="mt-3">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="{{ page_url_prefix }}page={{ page_obj.previous_page_number }}">Previous</a>
+        </li>
+        {% endif %}
+
+        <li class="page-item disabled">
+            <span class="page-link">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+        </li>
+
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="{{ page_url_prefix }}page={{ page_obj.next_page_number }}">Next</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+{% endblock %}

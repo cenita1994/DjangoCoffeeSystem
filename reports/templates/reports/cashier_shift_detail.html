@@ -1,0 +1,465 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Cashier Shift Detail | Django Coffee System
+{% endblock %}
+
+{% block content %}
+
+<style>
+    @media print {
+        nav,
+        footer,
+        .navbar,
+        .no-print,
+        .btn {
+            display: none !important;
+        }
+
+        body {
+            background: #ffffff !important;
+            color: #000000 !important;
+        }
+
+        .card {
+            box-shadow: none !important;
+            border: 1px solid #dee2e6 !important;
+            page-break-inside: avoid;
+        }
+
+        .card-header {
+            background: #212529 !important;
+            color: #ffffff !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .container,
+        .container-fluid {
+            width: 100% !important;
+            max-width: 100% !important;
+        }
+
+        .row {
+            page-break-inside: avoid;
+        }
+
+        canvas {
+            max-height: 250px !important;
+        }
+
+        .alert {
+            border: 1px solid #dee2e6 !important;
+            background: #ffffff !important;
+            color: #000000 !important;
+        }
+
+        h2,
+        h4,
+        h5,
+        h6,
+        p {
+            color: #000000 !important;
+        }
+    }
+</style>
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">Cashier Shift Detail</h2>
+        <p class="text-muted mb-0">
+            Cash drawer summary and shift reconciliation.
+        </p>
+    </div>
+
+
+<div class="d-flex gap-2 flex-wrap no-print">
+    <a href="{% url 'cashier_shift_list' %}" class="btn btn-outline-dark">
+        <i class="bi bi-arrow-left me-1"></i>
+        Back to Shifts
+    </a>
+
+    <button type="button" class="btn btn-outline-dark" onclick="window.print()">
+        <i class="bi bi-printer me-1"></i>
+        Print Report
+    </button>
+
+    {% if shift.status == 'Open' %}
+    <a href="{% url 'close_cashier_shift' shift.id %}" class="btn btn-danger">
+        <i class="bi bi-box-arrow-right me-1"></i>
+        Close Shift
+    </a>
+    {% endif %}
+
+    {% if is_manager_or_owner_user %}
+        {% if shift.status == 'Closed' and not shift.received_by_manager %}
+        <a href="{% url 'receive_cashier_shift' shift.id %}" class="btn btn-success">
+            <i class="bi bi-check2-circle me-1"></i>
+            Receive Shift
+        </a>
+        {% endif %}
+    {% endif %}
+</div>
+
+
+</div>
+
+<div class="row g-3 mb-4">
+
+
+<div class="col-12 col-md-6 col-xl-3">
+    <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+            <p class="text-muted mb-1">Cashier</p>
+            <h5 class="fw-bold mb-0">{{ shift.cashier.username }}</h5>
+        </div>
+    </div>
+</div>
+
+<div class="col-12 col-md-6 col-xl-3">
+    <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+            <p class="text-muted mb-1">Status</p>
+
+            {% if shift.status == 'Open' %}
+                <span class="badge bg-success">Open</span>
+            {% else %}
+                <span class="badge bg-secondary">Closed</span>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="col-12 col-md-6 col-xl-3">
+    <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+            <p class="text-muted mb-1">Shift Start</p>
+            <h6 class="fw-bold mb-0">
+                {{ shift.shift_start|date:"M d, Y h:i A" }}
+            </h6>
+        </div>
+    </div>
+</div>
+
+<div class="col-12 col-md-6 col-xl-3">
+    <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+            <p class="text-muted mb-1">Shift End</p>
+            <h6 class="fw-bold mb-0">
+                {% if shift.shift_end %}
+                    {{ shift.shift_end|date:"M d, Y h:i A" }}
+                {% else %}
+                    Ongoing
+                {% endif %}
+            </h6>
+        </div>
+    </div>
+</div>
+
+
+</div>
+
+<div class="row g-3 mb-4">
+
+
+<div class="col-12 col-md-6 col-xl-3">
+    <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+            <p class="text-muted mb-1">Expected Cash Drawer</p>
+            <h4 class="fw-bold mb-0">₱{{ totals.expected_cash|floatformat:2 }}</h4>
+        </div>
+    </div>
+</div>
+
+<div class="col-12 col-md-6 col-xl-3">
+    <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+            <p class="text-muted mb-1">Actual Cash Counted</p>
+            <h4 class="fw-bold mb-0">
+                {% if shift.actual_cash_counted is not None %}
+                    ₱{{ shift.actual_cash_counted|floatformat:2 }}
+                {% else %}
+                    —
+                {% endif %}
+            </h4>
+        </div>
+    </div>
+</div>
+
+<div class="col-12 col-md-6 col-xl-3">
+    <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+            <p class="text-muted mb-1">Over / Short</p>
+
+            {% if shift.actual_cash_counted is None %}
+                <h4 class="fw-bold mb-0">—</h4>
+            {% elif totals.over_short_amount > 0 %}
+                <h4 class="fw-bold text-success mb-0">
+                    +₱{{ totals.over_short_amount|floatformat:2 }}
+                </h4>
+            {% elif totals.over_short_amount < 0 %}
+                <h4 class="fw-bold text-danger mb-0">
+                    ₱{{ totals.over_short_amount|floatformat:2 }}
+                </h4>
+            {% else %}
+                <h4 class="fw-bold mb-0">
+                    ₱{{ totals.over_short_amount|floatformat:2 }}
+                </h4>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="col-12 col-md-6 col-xl-3">
+    <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+            <p class="text-muted mb-1">Total Sales Processed</p>
+            <h4 class="fw-bold mb-0">₱{{ totals.total_sales_processed|floatformat:2 }}</h4>
+        </div>
+    </div>
+</div>
+
+
+</div>
+
+<div class="row g-4 mb-4">
+
+
+<div class="col-12 col-xl-5">
+    <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0">
+                <i class="bi bi-calculator me-1"></i>
+                Cash Drawer Breakdown
+            </h5>
+        </div>
+
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-sm align-middle">
+                    <tbody>
+                        <tr>
+                            <td>Opening Cash</td>
+                            <td class="text-end fw-semibold">₱{{ shift.opening_cash|floatformat:2 }}</td>
+                        </tr>
+
+                        <tr>
+                            <td>Cash Sales</td>
+                            <td class="text-end fw-semibold">₱{{ totals.cash_sales|floatformat:2 }}</td>
+                        </tr>
+
+                        <tr>
+                            <td>Cash-in Received</td>
+                            <td class="text-end fw-semibold">₱{{ totals.cash_in_received|floatformat:2 }}</td>
+                        </tr>
+
+                        <tr>
+                            <td>Cash Refunds</td>
+                            <td class="text-end text-danger fw-semibold">- ₱{{ totals.cash_refunds|floatformat:2 }}</td>
+                        </tr>
+
+                        <tr>
+                            <td>Cash Payouts / Expenses / Cash Drops</td>
+                            <td class="text-end text-danger fw-semibold">- ₱{{ shift.cash_payouts|floatformat:2 }}</td>
+                        </tr>
+
+                        <tr class="table-dark">
+                            <td class="fw-bold">Expected Cash Drawer</td>
+                            <td class="text-end fw-bold">₱{{ totals.expected_cash|floatformat:2 }}</td>
+                        </tr>
+
+                        {% if shift.actual_cash_counted is not None %}
+                        <tr>
+                            <td>Actual Cash Counted</td>
+                            <td class="text-end fw-semibold">₱{{ shift.actual_cash_counted|floatformat:2 }}</td>
+                        </tr>
+
+                        <tr>
+                            <td class="fw-bold">Over / Short</td>
+                            <td class="text-end fw-bold">
+                                {% if totals.over_short_amount > 0 %}
+                                    <span class="text-success">+₱{{ totals.over_short_amount|floatformat:2 }}</span>
+                                {% elif totals.over_short_amount < 0 %}
+                                    <span class="text-danger">₱{{ totals.over_short_amount|floatformat:2 }}</span>
+                                {% else %}
+                                    ₱{{ totals.over_short_amount|floatformat:2 }}
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="alert alert-info small mb-0">
+                <i class="bi bi-info-circle me-1"></i>
+                Expected Cash = Opening Cash + Cash Sales + Cash-in Received - Cash Refunds - Cash Payouts.
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="col-12 col-xl-7">
+    <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0">
+                <i class="bi bi-bar-chart me-1"></i>
+                Cash Drawer Graph
+            </h5>
+        </div>
+
+        <div class="card-body">
+            <canvas id="cashDrawerChart" height="170"></canvas>
+        </div>
+    </div>
+</div>
+
+
+</div>
+
+<div class="row g-4">
+
+
+<div class="col-12 col-xl-6">
+    <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0">
+                <i class="bi bi-credit-card me-1"></i>
+                Non-Cash Sales Summary
+            </h5>
+        </div>
+
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-sm align-middle">
+                    <tbody>
+                        <tr>
+                            <td>GCash Sales</td>
+                            <td class="text-end fw-semibold">₱{{ totals.gcash_sales|floatformat:2 }}</td>
+                        </tr>
+
+                        <tr>
+                            <td>Wallet Sales</td>
+                            <td class="text-end fw-semibold">₱{{ totals.wallet_sales|floatformat:2 }}</td>
+                        </tr>
+
+                        <tr>
+                            <td>GCash Cash-in</td>
+                            <td class="text-end fw-semibold">₱{{ totals.gcash_cash_in|floatformat:2 }}</td>
+                        </tr>
+
+                        <tr>
+                            <td>Paid Orders Count</td>
+                            <td class="text-end fw-semibold">{{ totals.paid_orders_count }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="alert alert-warning small mb-0">
+                <i class="bi bi-exclamation-triangle me-1"></i>
+                These values are not added to the physical cash drawer, but they are important for payment audit.
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="col-12 col-xl-6">
+    <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0">
+                <i class="bi bi-journal-text me-1"></i>
+                Shift Notes
+            </h5>
+        </div>
+
+        <div class="card-body">
+            <p class="mb-2">
+                <strong>Received by Manager/Owner:</strong>
+                {% if shift.received_by_manager %}
+                    {{ shift.received_by_manager.username }}
+                {% else %}
+                    —
+                {% endif %}
+            </p>
+
+            <p class="mb-2">
+                <strong>Received At:</strong>
+                {% if shift.received_at %}
+                    {{ shift.received_at|date:"M d, Y h:i A" }}
+                {% else %}
+                    —
+                {% endif %}
+            </p>
+
+            <p class="mb-2">
+                <strong>Cashier Remarks:</strong><br>
+                {% if shift.remarks %}
+                    {{ shift.remarks|linebreaksbr }}
+                {% else %}
+                    <span class="text-muted">No cashier remarks.</span>
+                {% endif %}
+            </p>
+
+            <p class="mb-0">
+                <strong>Manager Remarks:</strong><br>
+                {% if shift.manager_remarks %}
+                    {{ shift.manager_remarks|linebreaksbr }}
+                {% else %}
+                    <span class="text-muted">No manager remarks.</span>
+                {% endif %}
+            </p>
+        </div>
+    </div>
+</div>
+
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    const cashDrawerData = {{ cash_drawer_chart|safe }};
+
+    function peso(value) {
+        return "₱" + Number(value || 0).toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
+
+    new Chart(document.getElementById("cashDrawerChart"), {
+        type: "bar",
+        data: {
+            labels: cashDrawerData.map(item => item.label),
+            datasets: [{
+                label: "Amount",
+                data: cashDrawerData.map(item => item.amount)
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return "Amount: " + peso(context.raw);
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return peso(value);
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
+
+{% endblock %}

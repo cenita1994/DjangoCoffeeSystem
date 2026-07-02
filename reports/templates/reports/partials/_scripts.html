@@ -1,0 +1,170 @@
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    const dailySalesData = {{ daily_sales_chart|safe }};
+    const paymentMethodData = {{ payment_method_chart|safe }};
+    const productSalesData = {{ product_sales_chart|safe }};
+    const categorySalesData = {{ category_sales_chart|safe }};
+    const cashierSalesData = {{ cashier_sales_chart|safe }};
+
+    function peso(value) {
+        return "₱" + Number(value || 0).toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
+
+    new Chart(document.getElementById("dailySalesChart"), {
+        type: "line",
+        data: {
+            labels: dailySalesData.map(item => item.date),
+            datasets: [{
+                label: "Net Sales",
+                data: dailySalesData.map(item => item.sales),
+                tension: 0.3,
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return "Sales: " + peso(context.raw);
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return peso(value);
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    new Chart(document.getElementById("paymentMethodChart"), {
+        type: "doughnut",
+        data: {
+            labels: paymentMethodData.map(item => item.method),
+            datasets: [{
+                label: "Sales",
+                data: paymentMethodData.map(item => item.sales)
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.label + ": " + peso(context.raw);
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    new Chart(document.getElementById("productSalesChart"), {
+        type: "bar",
+        data: {
+            labels: productSalesData.map(item => item.product),
+            datasets: [{
+                label: "Quantity Sold",
+                data: productSalesData.map(item => item.quantity)
+            }]
+        },
+        options: {
+            indexAxis: "y",
+            responsive: true,
+            scales: {
+                x: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    new Chart(document.getElementById("categorySalesChart"), {
+        type: "bar",
+        data: {
+            labels: categorySalesData.map(item => item.category),
+            datasets: [{
+                label: "Sales",
+                data: categorySalesData.map(item => item.sales)
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return "Sales: " + peso(context.raw);
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return peso(value);
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    new Chart(document.getElementById("cashierSalesChart"), {
+        type: "bar",
+        data: {
+            labels: cashierSalesData.map(item => item.cashier),
+            datasets: [
+                {
+                    label: "Cash Sales",
+                    data: cashierSalesData.map(item => item.cashSales)
+                },
+                {
+                    label: "GCash Sales",
+                    data: cashierSalesData.map(item => item.gcashSales)
+                },
+                {
+                    label: "Wallet Sales",
+                    data: cashierSalesData.map(item => item.walletSales)
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.dataset.label + ": " + peso(context.raw);
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return peso(value);
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>

@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Apply Discount | Django Coffee System
+{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-7">
+
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-dark text-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-tags me-1"></i>
+                    Apply Item Discount
+                </h4>
+            </div>
+
+            <div class="card-body p-4">
+
+                <div class="alert alert-info">
+                    <strong>Order #:</strong> {{ order_item.order.id }} <br>
+                    <strong>Product:</strong> {{ order_item.product.name }} <br>
+                    <strong>Ordered Quantity:</strong> {{ order_item.quantity }} <br>
+                    <strong>Unit Price:</strong> ₱{{ order_item.price }} <br>
+                    <strong>Item Subtotal:</strong> ₱{{ order_item.subtotal }}
+                </div>
+
+                <form method="POST">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            Discount Rule
+                        </label>
+                        {{ form.discount_rule }}
+
+                        {% if form.discount_rule.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ form.discount_rule.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            Discounted Quantity
+                        </label>
+                        {{ form.discounted_quantity }}
+
+                        {% if form.discounted_quantity.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ form.discounted_quantity.errors }}
+                            </div>
+                        {% endif %}
+
+                        <div class="form-text">
+                            Enter how many quantity from this item will receive the selected discount.
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            Cardholder Name
+                        </label>
+                        {{ form.cardholder_name }}
+
+                        {% if form.cardholder_name.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ form.cardholder_name.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            Card Number / ID Number
+                        </label>
+                        {{ form.card_number }}
+
+                        {% if form.card_number.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ form.card_number.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            Remarks
+                        </label>
+                        {{ form.remarks }}
+
+                        {% if form.remarks.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ form.remarks.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="alert alert-secondary small">
+                        <strong>Note:</strong>
+                        Senior/PWD discounts should be applied only to the item quantity that belongs to the eligible customer/cardholder.
+                    </div>
+
+                    <div class="d-flex flex-column flex-sm-row justify-content-between gap-2 mt-4">
+                        <a href="{% url 'order_detail' order_item.order.id %}" class="btn btn-secondary">
+                            Back
+                        </a>
+
+                        <button type="submit" class="btn btn-dark">
+                            <i class="bi bi-check-circle me-1"></i>
+                            Apply Discount
+                        </button>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

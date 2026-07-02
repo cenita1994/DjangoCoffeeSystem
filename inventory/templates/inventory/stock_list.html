@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Product Availability | Django Coffee System
+{% endblock %}
+
+{% block content %}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">Product Availability</h2>
+        <p class="text-muted mb-0">
+            Monitor current stock levels, record stock-in transactions, and adjust stock only when correction is needed.
+        </p>
+    </div>
+
+    <div class="d-flex gap-2 flex-wrap">
+        <a href="{% url 'product' %}" class="btn btn-outline-dark">
+            <i class="bi bi-cup-hot me-1"></i>
+            Product Management
+        </a>
+
+        <a href="{% url 'stock_movement_list' %}" class="btn btn-dark">
+            <i class="bi bi-clock-history me-1"></i>
+            Availability Movements
+        </a>
+
+        <a href="{% url 'stock_movement_list' %}" class="btn btn-outline-dark">
+            <i class="bi bi-clock-history me-1"></i>
+            Availability Movements
+        </a>
+    </div>
+</div>
+
+<div class="alert alert-info shadow-sm">
+    <strong>Note:</strong>
+    Product availability is used as a selling limit for customer orders. Actual deliveries and raw material stock-in should be recorded under Ingredient Inventory.
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-dark text-white">
+        <h5 class="mb-0">
+            <i class="bi bi-box-seam me-1"></i>
+            Current Product Availability
+        </h5>
+    </div>
+
+    <div class="card-body">
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Product</th>
+                        <th>Category</th>
+                        <th>Selling Limit</th>
+                        <th>Alert Level</th>
+                        <th>Status</th>
+                        <th>Last Updated</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for stock in stocks %}
+                    <tr>
+                        <td class="fw-semibold">{{ stock.product }}</td>
+
+                        <td>{{ stock.product.category }}</td>
+
+                        <td>
+                            <span class="fw-bold">{{ stock.quantity }}</span>
+                        </td>
+
+                        <td>{{ stock.reorder_level }}</td>
+
+                        <td>
+                            {% if stock.stock_status == "Available" %}
+                                <span class="badge bg-success">Available</span>
+                            {% elif stock.stock_status == "Low Stock" %}
+                                <span class="badge bg-warning text-dark">Low Stock</span>
+                            {% else %}
+                                <span class="badge bg-danger">Out of Stock</span>
+                            {% endif %}
+                        </td>
+
+                        <td>{{ stock.last_updated|date:"M d, Y h:i A" }}</td>
+
+                        <td class="text-end">
+                            <div class="d-flex justify-content-end gap-2 flex-wrap">
+
+                                <a href="{% url 'edit_stock' stock.id %}" class="btn btn-sm btn-warning">
+                                    <i class="bi bi-sliders me-1"></i>
+                                    Adjust Stock
+                                </a>
+
+                            </div>
+                        </td>
+                    </tr>
+
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">
+                            No stock records available.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <p class="text-muted small mt-3 mb-0">
+            Selling limit controls how many orders can still be accepted for each product. Actual ingredient inventory is managed separately.
+        </p>
+
+    </div>
+</div>
+
+{% endblock %}

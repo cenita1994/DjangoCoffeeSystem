@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Cashier Dashboard | Django Coffee System
+{% endblock %}
+
+{% block content %}
+
+<div class="row g-4">
+
+
+<div class="col-12">
+    <div class="p-4 bg-light rounded shadow-sm">
+        <h2 class="fw-bold mb-1">Cashier Dashboard</h2>
+        <p class="text-muted mb-0">
+            Welcome, {{ request.user.first_name|default:request.user.username }}.
+            You can open cashier shifts, create walk-in orders, process orders, and handle customer wallet cash-ins.
+        </p>
+    </div>
+</div>
+
+{% include 'accounts/partials/employee_announcements.html' %}
+
+<!-- Order Summary Cards -->
+<div class="col-12 col-md-4">
+    <div class="card border-0 shadow-sm h-100 dashboard-card">
+        <div class="card-body p-4">
+            <i class="bi bi-hourglass-split fs-1 text-warning"></i>
+            <h5 class="fw-bold mt-3">Pending Orders</h5>
+            <h2 class="fw-bold">{{ pending_orders }}</h2>
+            <a href="{% url 'order_list' %}?status=Pending" class="btn btn-outline-dark">
+                View Pending
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="col-12 col-md-4">
+    <div class="card border-0 shadow-sm h-100 dashboard-card">
+        <div class="card-body p-4">
+            <i class="bi bi-cup-hot fs-1 text-warning"></i>
+            <h5 class="fw-bold mt-3">Preparing Orders</h5>
+            <h2 class="fw-bold">{{ preparing_orders }}</h2>
+            <a href="{% url 'order_list' %}?status=Preparing" class="btn btn-outline-dark">
+                View Preparing
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="col-12 col-md-4">
+    <div class="card border-0 shadow-sm h-100 dashboard-card">
+        <div class="card-body p-4">
+            <i class="bi bi-check-circle fs-1 text-warning"></i>
+            <h5 class="fw-bold mt-3">Ready Orders</h5>
+            <h2 class="fw-bold">{{ ready_orders }}</h2>
+            <a href="{% url 'order_list' %}?status=Ready" class="btn btn-outline-dark">
+                View Ready
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Main Cashier Shortcuts -->
+<div class="col-12">
+    <h5 class="fw-bold mt-2 mb-0">Cashier Shortcuts</h5>
+    <p class="text-muted mb-0">
+        Start with Cashier Shifts before processing walk-in orders or wallet cash-ins.
+    </p>
+</div>
+
+<div class="col-12 col-md-6 col-xl-4">
+    <a href="{% url 'cashier_shift_list' %}" class="text-decoration-none">
+        <div class="card border-0 shadow-sm h-100 dashboard-card">
+            <div class="card-body p-4">
+                <i class="bi bi-cash-stack fs-1 text-warning"></i>
+                <h5 class="fw-bold mt-3 text-dark">Cashier Shifts</h5>
+                <p class="text-muted small mb-3">
+                    Open your shift, view your current shift, and close your cash drawer.
+                </p>
+                <span class="btn btn-dark btn-sm">
+                    Open/View Shift
+                </span>
+            </div>
+        </div>
+    </a>
+</div>
+
+<div class="col-12 col-md-6 col-xl-4">
+    <a href="{% url 'create_walkin_order' %}" class="text-decoration-none">
+        <div class="card border-0 shadow-sm h-100 dashboard-card">
+            <div class="card-body p-4">
+                <i class="bi bi-bag-plus fs-1 text-warning"></i>
+                <h5 class="fw-bold mt-3 text-dark">Walk-in Order</h5>
+                <p class="text-muted small mb-3">
+                    Create an order for customers who buy directly at the counter.
+                </p>
+                <span class="btn btn-outline-dark btn-sm">
+                    Create Walk-in Order
+                </span>
+            </div>
+        </div>
+    </a>
+</div>
+
+<div class="col-12 col-md-6 col-xl-4">
+    <a href="{% url 'order_list' %}" class="text-decoration-none">
+        <div class="card border-0 shadow-sm h-100 dashboard-card">
+            <div class="card-body p-4">
+                <i class="bi bi-receipt-cutoff fs-1 text-warning"></i>
+                <h5 class="fw-bold mt-3 text-dark">Orders</h5>
+                <p class="text-muted small mb-3">
+                    View online and walk-in orders and update their order status.
+                </p>
+                <span class="btn btn-outline-dark btn-sm">
+                    View Orders
+                </span>
+            </div>
+        </div>
+    </a>
+</div>
+
+<div class="col-12 col-md-6 col-xl-4">
+    <a href="{% url 'cash_in' %}" class="text-decoration-none">
+        <div class="card border-0 shadow-sm h-100 dashboard-card">
+            <div class="card-body p-4">
+                <i class="bi bi-wallet2 fs-1 text-warning"></i>
+                <h5 class="fw-bold mt-3 text-dark">Cash-in Wallet</h5>
+                <p class="text-muted small mb-3">
+                    Add customer wallet balance through cash or GCash payment.
+                </p>
+                <span class="btn btn-outline-dark btn-sm">
+                    Process Cash-in
+                </span>
+            </div>
+        </div>
+    </a>
+</div>
+
+<div class="col-12 col-md-6 col-xl-4">
+    <a href="{% url 'staff_menu' %}" class="text-decoration-none">
+        <div class="card border-0 shadow-sm h-100 dashboard-card">
+            <div class="card-body p-4">
+                <i class="bi bi-cup-hot fs-1 text-warning"></i>
+                <h5 class="fw-bold mt-3 text-dark">Menu</h5>
+                <p class="text-muted small mb-3">
+                    View available products for cashier-assisted ordering.
+                </p>
+                <span class="btn btn-outline-dark btn-sm">
+                    View Menu
+                </span>
+            </div>
+        </div>
+    </a>
+</div>
+
+
+</div>
+
+{% endblock %}

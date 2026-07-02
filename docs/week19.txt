@@ -1,0 +1,55 @@
+Step 1: inventory/models.py
+
+from django.db import models
+
+class Product(models.Model):
+    name = models.CharField(max_length=100)
+    category = models.CharField(max_length=100)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    quantity = models.IntegerField()
+    description = models.TextField(blank=True, null=True)
+    date_added = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
+
+step 2: 
+python manage.py makemigrations
+
+
+step 3:
+inventory/admin.py
+
+from django.contrib import admin
+from .models import Product
+
+admin.site.register(Product)
+
+Step 4: 
+python manage.py migrate
+
+python manage.py createsuperuser
+
+python manage.py runserver
+
+http://127.0.0.1:8000/admin/
+
+Pag nakapasok ka, dapat makita mo:
+
+Products
+
+or under Inventory may Products.
+
+Click Products → Add Product.
+
+Add sample:
+
+Name: Iced Coffee
+Category: Drinks
+Price: 75.00
+Quantity: 20
+Description: Cold coffee drink
+
+Then click Save.
+

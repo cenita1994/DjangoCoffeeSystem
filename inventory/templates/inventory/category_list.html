@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Product Categories | Django Coffee System
+{% endblock %}
+
+{% block content %}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">Product Categories</h2>
+        <p class="text-muted mb-0">
+            Manage product categories used in the product form dropdown.
+        </p>
+    </div>
+
+    <div class="d-flex gap-2">
+        <a href="{% url 'product' %}" class="btn btn-outline-dark">
+            <i class="bi bi-arrow-left me-1"></i>
+            Back to Products
+        </a>
+
+        <a href="{% url 'add_category' %}" class="btn btn-dark">
+            <i class="bi bi-plus-circle me-1"></i>
+            Add Category
+        </a>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-dark text-white">
+        <h5 class="mb-0">
+            <i class="bi bi-tags me-1"></i>
+            Category List
+        </h5>
+    </div>
+
+    <div class="card-body">
+
+        <div class="alert alert-info small">
+            <i class="bi bi-info-circle me-1"></i>
+            Categories with existing products cannot be deleted. You can deactivate them instead so they will no longer appear in the product form dropdown.
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Category Name</th>
+                        <th>Description</th>
+                        <th class="text-center">Products</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for category in categories %}
+                    <tr>
+                        <td class="fw-semibold">
+                            {{ category.name }}
+                        </td>
+
+                        <td>
+                            {% if category.description %}
+                                {{ category.description }}
+                            {% else %}
+                                <span class="text-muted">No description</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="text-center">
+                            <span class="badge bg-secondary">
+                                {{ category.products.count }}
+                            </span>
+                        </td>
+
+                        <td class="text-center">
+                            {% if category.is_active %}
+                                <span class="badge bg-success">Active</span>
+                            {% else %}
+                                <span class="badge bg-danger">Inactive</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="text-end">
+                            <div class="d-flex justify-content-end gap-2 flex-wrap">
+
+                                <a href="{% url 'edit_category' category.id %}" class="btn btn-sm btn-outline-dark">
+                                    <i class="bi bi-pencil-square me-1"></i>
+                                    Edit
+                                </a>
+
+                                <form method="POST" action="{% url 'toggle_category_status' category.id %}">
+                                    {% csrf_token %}
+
+                                    {% if category.is_active %}
+                                        <button type="submit" class="btn btn-sm btn-warning">
+                                            <i class="bi bi-eye-slash me-1"></i>
+                                            Deactivate
+                                        </button>
+                                    {% else %}
+                                        <button type="submit" class="btn btn-sm btn-success">
+                                            <i class="bi bi-eye me-1"></i>
+                                            Reactivate
+                                        </button>
+                                    {% endif %}
+                                </form>
+
+                                {% if category.products.count == 0 %}
+                                <a href="{% url 'delete_category' category.id %}" class="btn btn-sm btn-danger">
+                                    <i class="bi bi-trash me-1"></i>
+                                    Delete
+                                </a>
+                                {% else %}
+                                <button type="button" class="btn btn-sm btn-outline-secondary" disabled>
+                                    Delete Locked
+                                </button>
+                                {% endif %}
+
+                            </div>
+                        </td>
+                    </tr>
+
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-4">
+                            No categories found.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

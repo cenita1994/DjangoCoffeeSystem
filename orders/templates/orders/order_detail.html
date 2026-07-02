@@ -1,0 +1,762 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Order Details | Django Coffee System
+{% endblock %}
+
+{% block content %}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">Order #{{ order.id }}</h2>
+        <p class="text-muted mb-0">
+            {{ order.order_type }} order details, items, payment, and status updates.
+        </p>
+    </div>
+
+    <div class="d-flex gap-2 flex-wrap">
+        {% if is_customer_role %}
+            <a href="{% url 'my_orders' %}" class="btn btn-outline-dark">
+                <i class="bi bi-arrow-left me-1"></i>
+                Back to My Orders
+            </a>
+        {% else %}
+            <a href="{% url 'order_list' %}" class="btn btn-outline-dark">
+                <i class="bi bi-arrow-left me-1"></i>
+                Back to Orders
+            </a>
+        {% endif %}
+
+        {% if order.payment_status == "Paid" %}
+        <a href="{% url 'order_receipt' order.id %}" class="btn btn-dark">
+            <i class="bi bi-receipt me-1"></i>
+            View Receipt
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row g-4">
+
+    <div class="col-12 col-lg-8">
+
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Order Information
+                </h5>
+            </div>
+
+            <div class="card-body">
+                <div class="row g-3">
+
+                    <div class="col-12 col-md-6">
+                        <p class="mb-1 text-muted">Customer</p>
+                        <h6 class="fw-bold mb-0">{{ order.display_customer }}</h6>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <p class="mb-1 text-muted">Order Type</p>
+                        {% if order.order_type == "Online" %}
+                            <span class="badge bg-primary">Online</span>
+                        {% else %}
+                            <span class="badge bg-dark">Walk-in</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <p class="mb-1 text-muted">Order Status</p>
+
+                        {% if order.status == "Draft" %}
+                            <span class="badge bg-secondary">Draft</span>
+                        {% elif order.status == "Pending" %}
+                            <span class="badge bg-warning text-dark">Pending</span>
+                        {% elif order.status == "Preparing" %}
+                            <span class="badge bg-info text-dark">Preparing</span>
+                        {% elif order.status == "Ready" %}
+                            <span class="badge bg-primary">Ready</span>
+                        {% elif order.status == "Completed" %}
+                            <span class="badge bg-success">Completed</span>
+                        {% elif order.status == "Cancelled" %}
+                            <span class="badge bg-danger">Cancelled</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <p class="mb-1 text-muted">Payment Status</p>
+
+                        {% if order.payment_status == "Paid" %}
+                            <span class="badge bg-success">Paid</span>
+                        {% elif order.payment_status == "Refunded" %}
+                            <span class="badge bg-info text-dark">Refunded</span>
+                        {% else %}
+                            <span class="badge bg-danger">Unpaid</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <p class="mb-1 text-muted">Payment Method</p>
+                        {% if order.payment_method %}
+                            <h6 class="fw-bold mb-0">{{ order.payment_method }}</h6>
+                        {% else %}
+                            <span class="text-muted">None</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <p class="mb-1 text-muted">Receipt No.</p>
+                        {% if order.receipt_number %}
+                            <h6 class="fw-bold mb-0">{{ order.receipt_number }}</h6>
+                        {% else %}
+                            <span class="text-muted">Not yet generated</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <p class="mb-1 text-muted">Paid At</p>
+                        {% if order.paid_at %}
+                            <h6 class="fw-bold mb-0">{{ order.paid_at|date:"M d, Y h:i A" }}</h6>
+                        {% else %}
+                            <span class="text-muted">N/A</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <p class="mb-1 text-muted">Cashier</p>
+                        {% if order.payment_received_by %}
+                            <h6 class="fw-bold mb-0">{{ order.payment_received_by.username }}</h6>
+                        {% else %}
+                            <span class="text-muted">N/A</span>
+                        {% endif %}
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        {% if is_staff_role and order.status == "Draft" %}
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-plus-circle me-1"></i>
+                    Add Product to Order
+                </h5>
+            </div>
+
+            <div class="card-body">
+                <form method="POST" action="{% url 'add_order_item' order.id %}">
+                    {% csrf_token %}
+
+                    <div class="row g-3 align-items-end">
+                        <div class="col-12 col-lg-7">
+                            <label class="form-label fw-semibold">Product</label>
+                            {{ item_form.product }}
+                        </div>
+
+                        <div class="col-12 col-sm-6 col-lg-3">
+                            <label class="form-label fw-semibold">Quantity</label>
+                            {{ item_form.quantity }}
+                        </div>
+
+                        <div class="col-12 col-sm-6 col-lg-2">
+                            <button type="submit" class="btn btn-dark w-100">
+                                <i class="bi bi-plus-circle me-1"></i>
+                                Add
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-text mt-2">
+                        Only available products with configured recipes and enough ingredients are selectable.
+                    </div>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-cart-check me-1"></i>
+                    Order Items
+                </h5>
+            </div>
+
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Product</th>
+                                <th>Price</th>
+                                <th>Qty</th>
+                                <th>Subtotal</th>
+                                <th>Discount</th>
+                                <th>Net Total</th>
+                                {% if is_staff_role and order.status == "Draft" %}
+                                    <th class="text-end">Action</th>
+                                {% endif %}
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for item in order.items.all %}
+                            <tr>
+                                <td>
+                                    <div class="fw-semibold">{{ item.product.name }}</div>
+                                    {% if item.product.size != "Not Applicable" %}
+                                    <span class="badge bg-light text-dark border">{{ item.product.size }}</span>
+                                    {% endif %}
+                                </td>
+
+                                <td>₱{{ item.price }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td>₱{{ item.subtotal }}</td>
+
+                                <td>
+                                    {% if item.total_discount %}
+                                        <span class="text-danger fw-bold">- ₱{{ item.total_discount }}</span>
+                                    {% else %}
+                                        <span class="text-muted">₱0</span>
+                                    {% endif %}
+                                </td>
+
+                                <td class="fw-bold">₱{{ item.net_total }}</td>
+
+                                {% if is_staff_role and order.status == "Draft" %}
+                                <td class="text-end">
+                                    <a href="{% url 'apply_discount_to_order_item' item.id %}" class="btn btn-sm btn-outline-dark">
+                                        <i class="bi bi-tags me-1"></i>
+                                        Discount
+                                    </a>
+                                </td>
+                                {% endif %}
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="{% if is_staff_role and order.status == 'Draft' %}7{% else %}6{% endif %}" class="text-center text-muted py-4">
+                                    No products added to this order yet.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <p class="text-muted small mt-3 mb-0">
+                    Discounts are applied per item and per eligible quantity.
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="col-12 col-lg-4">
+
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-receipt me-1"></i>
+                    Payment Summary
+                </h5>
+            </div>
+
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Gross Sales</span>
+                    <span class="fw-bold">₱{{ order.subtotal_amount }}</span>
+                </div>
+
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Less: Item Discounts</span>
+                    <span class="fw-bold text-danger">- ₱{{ order.discount_amount }}</span>
+                </div>
+
+                <hr>
+
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">VATable Sales</span>
+                    <span>₱{{ order.vatable_sales }}</span>
+                </div>
+
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">VAT-Exempt Sales</span>
+                    <span>₱{{ order.vat_exempt_sales }}</span>
+                </div>
+
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">VAT Amount</span>
+                    <span>₱{{ order.vat_amount }}</span>
+                </div>
+
+                <hr>
+
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="fw-bold">Total Amount Due</span>
+                    <h4 class="fw-bold mb-0">₱{{ order.total_amount }}</h4>
+                </div>
+
+                {% if order.payment_status == "Paid" %}
+                <hr>
+
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Amount Received</span>
+                    <span class="fw-bold">₱{{ order.amount_received }}</span>
+                </div>
+
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Change</span>
+                    <span class="fw-bold text-success">₱{{ order.change_amount }}</span>
+                </div>
+
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Receipt No.</span>
+                    <span class="fw-bold">{{ order.receipt_number }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if order.status == "Draft" %}
+
+            {% if order.order_type == "Walk-in" and is_staff_role %}
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-cash-stack me-1"></i>
+                        Payment
+                    </h5>
+                </div>
+
+                <div class="card-body">
+                    <form id="walkinPaymentForm" method="POST" action="{% url 'place_order' order.id %}">
+                        {% csrf_token %}
+
+                        <div class="alert alert-info small">
+                            Discounts and VAT are already computed. Select payment method and enter payment details.
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Payment Method</label>
+                            {{ payment_form.payment_method }}
+                        </div>
+
+                        <div class="mb-3" id="cashReceivedWrapper">
+                            <label class="form-label fw-semibold">Cash Received</label>
+                            {{ payment_form.amount_received }}
+                            <div class="form-text">Required for cash payment.</div>
+                        </div>
+
+                        <div class="mb-3" id="changePreviewWrapper">
+                            <div class="bg-light border rounded p-3">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">Amount Due</span>
+                                    <span class="fw-bold">₱{{ order.total_amount }}</span>
+                                </div>
+
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">Cash Received</span>
+                                    <span class="fw-bold" id="cashReceivedPreview">₱0.00</span>
+                                </div>
+
+                                <hr class="my-2">
+
+                                <div class="d-flex justify-content-between">
+                                    <span class="fw-bold">Change</span>
+                                    <span class="fw-bold text-success" id="changePreview">₱0.00</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3" id="paymentReferenceWrapper">
+                            <label class="form-label fw-semibold">GCash Reference Number</label>
+                            {{ payment_form.payment_reference_number }}
+                            <div class="form-text">Required only for GCash payment.</div>
+                        </div>
+
+                        <button type="button"
+                                class="btn btn-dark w-100"
+                                data-bs-toggle="modal"
+                                data-bs-target="#confirmWalkinPaymentModal">
+                            <i class="bi bi-check-circle me-1"></i>
+                            Confirm Payment and Place Order
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if order.order_type == "Online" and is_customer_role %}
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-wallet2 me-1"></i>
+                        Wallet Payment
+                    </h5>
+                </div>
+
+                <div class="card-body">
+                    <p class="text-muted">
+                        This online order will be paid using your wallet balance.
+                    </p>
+
+                    <button type="button"
+                            class="btn btn-dark w-100"
+                            data-bs-toggle="modal"
+                            data-bs-target="#walletPaymentConfirmModal">
+                        <i class="bi bi-check-circle me-1"></i>
+                        Pay with Wallet and Place Order
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+
+
+<!-- Wallet Payment Confirmation Modal -->
+<div class="modal fade" id="walletPaymentConfirmModal" tabindex="-1" aria-labelledby="walletPaymentConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="walletPaymentConfirmModalLabel">
+                    <i class="bi bi-wallet2 me-1"></i>
+                    Confirm Wallet Payment
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <p class="mb-2">
+                    Are you sure you want to pay with your wallet and place this order?
+                </p>
+
+                <div class="border rounded p-3 bg-light">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Order No.</span>
+                        <span class="fw-bold">#{{ order.id }}</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Payment Method</span>
+                        <span class="fw-bold">Wallet</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Total Amount</span>
+                        <span class="fw-bold">₱{{ order.total_amount }}</span>
+                    </div>
+                </div>
+
+                <p class="text-muted small mt-3 mb-0">
+                    Product stock, ingredients, and wallet balance will be validated before the order is finalized.
+                </p>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    Review Again
+                </button>
+
+                <form method="POST" action="{% url 'place_order' order.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-dark">
+                        <i class="bi bi-check-circle me-1"></i>
+                        Yes, Pay and Place Order
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+        {% endif %}
+
+        {% if is_staff_role and order.status != "Draft" and order.status != "Completed" and order.status != "Cancelled" %}
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-arrow-repeat me-1"></i>
+                    Quick Status Update
+                </h5>
+            </div>
+
+            <div class="card-body d-grid gap-2">
+                {% if order.status == "Pending" %}
+                <form method="POST" action="{% url 'quick_update_order_status' order.id 'Preparing' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-info w-100">Mark as Preparing</button>
+                </form>
+                {% endif %}
+
+                {% if order.status == "Preparing" %}
+                <form method="POST" action="{% url 'quick_update_order_status' order.id 'Ready' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-primary w-100">Mark as Ready</button>
+                </form>
+                {% endif %}
+
+                {% if order.status == "Ready" %}
+                <form method="POST" action="{% url 'quick_update_order_status' order.id 'Completed' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-success w-100">Mark as Completed</button>
+                </form>
+                {% endif %}
+
+                <button type="button"
+                        class="btn btn-outline-danger w-100"
+                        data-bs-toggle="modal"
+                        data-bs-target="#cancelOrderModal">
+                    Cancel Order
+                </button>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if is_customer_role and order.order_type == "Online" and order.status == "Pending" %}
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body">
+                <button type="button"
+                        class="btn btn-outline-danger w-100"
+                        data-bs-toggle="modal"
+                        data-bs-target="#cancelOrderModal">
+                    Cancel Order
+                </button>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+<!-- Walk-in Payment Confirmation Modal -->
+<div class="modal fade" id="confirmWalkinPaymentModal" tabindex="-1" aria-labelledby="confirmWalkinPaymentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="confirmWalkinPaymentModalLabel">
+                    <i class="bi bi-cash-stack me-1"></i>
+                    Confirm Payment
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <p class="mb-3">
+                    Please review the payment details before placing this order.
+                </p>
+
+                <div class="border rounded p-3 bg-light">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Order No.</span>
+                        <span class="fw-bold">#{{ order.id }}</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Payment Method</span>
+                        <span class="fw-bold" id="confirmPaymentMethod">N/A</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Total Amount Due</span>
+                        <span class="fw-bold">₱{{ order.total_amount }}</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Amount Received</span>
+                        <span class="fw-bold" id="confirmAmountReceived">₱0.00</span>
+                    </div>
+
+                    <hr class="my-2">
+
+                    <div class="d-flex justify-content-between">
+                        <span class="fw-bold">Change</span>
+                        <span class="fw-bold text-success" id="confirmChangeAmount">₱0.00</span>
+                    </div>
+                </div>
+
+                <div class="alert alert-warning small mt-3 mb-0">
+                    <i class="bi bi-exclamation-triangle me-1"></i>
+                    Once confirmed, the order will be paid, product availability will be deducted, and ingredients will be deducted.
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    Review Again
+                </button>
+
+                <button type="submit" form="walkinPaymentForm" class="btn btn-dark">
+                    Yes, Confirm Payment
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cancel Order Confirmation Modal -->
+<div class="modal fade" id="cancelOrderModal" tabindex="-1" aria-labelledby="cancelOrderModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="cancelOrderModalLabel">
+                    <i class="bi bi-x-circle me-1"></i>
+                    Cancel Order?
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <p class="mb-2">
+                    Are you sure you want to cancel Order #{{ order.id }}?
+                </p>
+
+                <div class="alert alert-warning mb-0">
+                    If this order is already paid, product availability and ingredients will be restored and the payment will be refunded.
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    No, Keep Order
+                </button>
+
+                {% if is_customer_role and order.order_type == "Online" %}
+                <form method="POST" action="{% url 'cancel_order' order.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Yes, Cancel Order</button>
+                </form>
+                {% else %}
+                <form method="POST" action="{% url 'quick_update_order_status' order.id 'Cancelled' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Yes, Cancel Order</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const amountInput = document.getElementById('id_amount_received');
+    const methodInput = document.getElementById('id_payment_method');
+    const referenceInput = document.getElementById('id_payment_reference_number');
+
+    const cashWrapper = document.getElementById('cashReceivedWrapper');
+    const changeWrapper = document.getElementById('changePreviewWrapper');
+    const referenceWrapper = document.getElementById('paymentReferenceWrapper');
+
+    const cashPreview = document.getElementById('cashReceivedPreview');
+    const changePreview = document.getElementById('changePreview');
+
+    const peso = '\u20b1';
+    const totalDue = parseFloat('{{ order.total_amount|default:"0" }}') || 0;
+
+    function getSelectedPaymentMethod() {
+        if (!methodInput) {
+            return '';
+        }
+
+        if (methodInput.options) {
+            return methodInput.options[methodInput.selectedIndex].text.trim();
+        }
+
+        return methodInput.value.trim();
+    }
+
+    function updatePreview() {
+        const amount = amountInput ? parseFloat(amountInput.value || '0') : 0;
+        const change = Math.max(amount - totalDue, 0);
+
+        if (cashPreview) {
+            cashPreview.textContent = peso + amount.toFixed(2);
+        }
+
+        if (changePreview) {
+            changePreview.textContent = peso + change.toFixed(2);
+        }
+    }
+
+    function updatePaymentFields() {
+        const selectedMethod = getSelectedPaymentMethod().toLowerCase();
+
+        const isCash = selectedMethod === 'cash';
+        const isGCash = selectedMethod === 'gcash';
+
+        if (cashWrapper) {
+            cashWrapper.style.display = isCash ? 'block' : 'none';
+        }
+
+        if (changeWrapper) {
+            changeWrapper.style.display = isCash ? 'block' : 'none';
+        }
+
+        if (referenceWrapper) {
+            referenceWrapper.style.display = isGCash ? 'block' : 'none';
+        }
+
+        if (amountInput) {
+            amountInput.required = isCash;
+        }
+
+        if (referenceInput) {
+            referenceInput.required = isGCash;
+        }
+
+        updatePreview();
+    }
+
+    if (amountInput) {
+        amountInput.addEventListener('input', updatePreview);
+    }
+
+    if (methodInput) {
+        methodInput.addEventListener('change', updatePaymentFields);
+    }
+
+    updatePaymentFields();
+
+    const modal = document.getElementById('confirmWalkinPaymentModal');
+
+    if (modal) {
+        modal.addEventListener('show.bs.modal', function () {
+            updatePaymentFields();
+
+            const selectedMethod = getSelectedPaymentMethod();
+            const selectedMethodLower = selectedMethod.toLowerCase();
+
+            const amount = amountInput ? parseFloat(amountInput.value || '0') : 0;
+            const change = Math.max(amount - totalDue, 0);
+
+            const confirmMethod = document.getElementById('confirmPaymentMethod');
+            const confirmAmount = document.getElementById('confirmAmountReceived');
+            const confirmChange = document.getElementById('confirmChangeAmount');
+
+            if (confirmMethod) {
+                confirmMethod.textContent = selectedMethod || 'N/A';
+            }
+
+            if (confirmAmount) {
+                if (selectedMethodLower === 'cash') {
+                    confirmAmount.textContent = peso + amount.toFixed(2);
+                } else if (selectedMethodLower === 'gcash') {
+                    confirmAmount.textContent = 'GCash Payment';
+                } else {
+                    confirmAmount.textContent = 'N/A';
+                }
+            }
+
+            if (confirmChange) {
+                if (selectedMethodLower === 'cash') {
+                    confirmChange.textContent = peso + change.toFixed(2);
+                } else {
+                    confirmChange.textContent = 'N/A';
+                }
+            }
+        });
+    }
+});
+</script>
+
+{% endblock %}

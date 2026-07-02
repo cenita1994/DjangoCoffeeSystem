@@ -1,0 +1,168 @@
+{% load role_tags %}
+
+<aside class="app-sidebar bg-white border-end shadow-sm">
+    <div class="sidebar-brand">
+        <a href="{% url 'dashboard' %}" class="sidebar-brand-link">
+            <div class="sidebar-brand-icon">
+                <i class="bi bi-cup-hot"></i>
+            </div>
+            <div>
+                <div class="sidebar-brand-title">Coffee System</div>
+                <div class="sidebar-brand-subtitle">
+                    {% if user|is_owner_role %}
+                        Owner Panel
+                    {% elif user|is_manager_role %}
+                        Manager Panel
+                    {% elif user|is_cashier_role %}
+                        Cashier Panel
+                    {% elif user|is_customer_role %}
+                        Customer Panel
+                    {% else %}
+                        User Panel
+                    {% endif %}
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="sidebar-menu">
+
+        {% if user|is_customer_role %}
+            <div class="sidebar-section-title">Customer</div>
+
+            <a href="{% url 'customer_menu' %}" class="sidebar-link">
+                <i class="bi bi-cup-hot"></i>
+                <span>Menu</span>
+            </a>
+
+            <a href="{% url 'cart' %}" class="sidebar-link">
+                <i class="bi bi-cart"></i>
+                <span>Cart</span>
+            </a>
+
+            <a href="{% url 'my_orders' %}" class="sidebar-link">
+                <i class="bi bi-receipt"></i>
+                <span>My Orders</span>
+            </a>
+        {% endif %}
+
+        {% if user|is_cashier_role %}
+            <div class="sidebar-section-title">Cashier</div>
+
+            <a href="{% url 'staff_menu' %}" class="sidebar-link">
+                <i class="bi bi-cup-hot"></i>
+                <span>Menu</span>
+            </a>
+
+            <a href="{% url 'create_walkin_order' %}" class="sidebar-link">
+                <i class="bi bi-bag-plus"></i>
+                <span>Walk-in Order</span>
+            </a>
+
+            <a href="{% url 'order_list' %}" class="sidebar-link">
+                <i class="bi bi-receipt-cutoff"></i>
+                <span>Orders</span>
+            </a>
+        {% endif %}
+
+        {% if user|is_manager_role or user|is_owner_role %}
+
+            <div class="sidebar-section-title">Operations</div>
+
+            <a class="sidebar-link sidebar-toggle" data-bs-toggle="collapse" href="#salesOperationsMenu" role="button">
+                <i class="bi bi-shop"></i>
+                <span>Sales Operations</span>
+                <i class="bi bi-chevron-down ms-auto sidebar-chevron"></i>
+            </a>
+
+            <div class="collapse sidebar-submenu" id="salesOperationsMenu">
+                <a href="{% url 'staff_menu' %}">Menu</a>
+                <a href="{% url 'order_list' %}">Orders</a>
+                <a href="{% url 'create_walkin_order' %}">Walk-in Order</a>
+                <a href="{% url 'discount_rule_list' %}">Discounts</a>
+            </div>
+
+            <a class="sidebar-link sidebar-toggle" data-bs-toggle="collapse" href="#inventoryMenu" role="button">
+                <i class="bi bi-box-seam"></i>
+                <span>Inventory</span>
+                <i class="bi bi-chevron-down ms-auto sidebar-chevron"></i>
+            </a>
+
+            <div class="collapse sidebar-submenu" id="inventoryMenu">
+                <a href="{% url 'product' %}">Products</a>
+                <a href="{% url 'category_list' %}">Product Categories</a>
+                <a href="{% url 'stock_list' %}">Product Availability</a>
+                <a href="{% url 'stock_movement_list' %}">Availability Movements</a>
+                <a href="{% url 'ingredient_list' %}">Ingredients</a>
+                <a href="{% url 'ingredient_stock_in' %}">Ingredient Stock In</a>
+                <a href="{% url 'ingredient_adjustment' %}">Ingredient Adjustment</a>
+                <a href="{% url 'ingredient_movement_list' %}">Ingredient Movements</a>
+                <a href="{% url 'recipe_item_list' %}">Product Recipes</a>
+            </div>
+
+            <a class="sidebar-link sidebar-toggle" data-bs-toggle="collapse" href="#reportsMenu" role="button">
+                <i class="bi bi-bar-chart-line"></i>
+                <span>Reports</span>
+                <i class="bi bi-chevron-down ms-auto sidebar-chevron"></i>
+            </a>
+
+            <div class="collapse sidebar-submenu" id="reportsMenu">
+                <a href="{% url 'reports_center' %}">Reports Center</a>
+                <a href="{% url 'sales_dashboard' %}">Sales Overview</a>
+                <a href="{% url 'sales_period_report' %}">Sales by Period</a>
+                <a href="{% url 'product_sales_report' %}">Product Sales</a>
+                <a href="{% url 'estimated_profit_report' %}">Estimated Profit</a>
+                <a href="{% url 'ingredient_demand_report' %}">Ingredient Demand</a>
+                <a href="{% url 'payment_method_report' %}">Payment Methods</a>
+                <a href="{% url 'cashier_sales_report' %}">Cashier Sales</a>
+                <a href="{% url 'cashier_shift_list' %}">Cashier Shifts</a>
+            </div>
+
+            <a class="sidebar-link sidebar-toggle" data-bs-toggle="collapse" href="#paymentsMenu" role="button">
+                <i class="bi bi-wallet2"></i>
+                <span>Payments</span>
+                <i class="bi bi-chevron-down ms-auto sidebar-chevron"></i>
+            </a>
+
+            <div class="collapse sidebar-submenu" id="paymentsMenu">
+                <a href="{% url 'wallet_list' %}">Customer Wallets</a>
+                <a href="{% url 'cash_in' %}">Cash In Wallet</a>
+                <a href="{% url 'wallet_transaction_list' %}">Wallet Transactions</a>
+            </div>
+
+            <a class="sidebar-link sidebar-toggle" data-bs-toggle="collapse" href="#cmsMenu" role="button">
+                <i class="bi bi-layout-text-window-reverse"></i>
+                <span>CMS</span>
+                <i class="bi bi-chevron-down ms-auto sidebar-chevron"></i>
+            </a>
+
+            <div class="collapse sidebar-submenu" id="cmsMenu">
+                <a href="{% url 'announcement_list' %}">Announcements</a>
+                <a href="{% url 'site_page_list' %}">Site Pages</a>
+            </div>
+
+        {% endif %}
+
+        {% if user|is_manager_role or user|is_owner_role %}
+            <div class="sidebar-section-title">Administration</div>
+
+            <a href="{% url 'forecasting_dashboard' %}" class="sidebar-link">
+                <i class="bi bi-graph-up-arrow"></i>
+                <span>Demand Forecasting</span>
+            </a>
+
+            {% if user|is_owner_role %}
+                <a href="{% url 'account_list' %}" class="sidebar-link">
+                    <i class="bi bi-people"></i>
+                    <span>Account Management</span>
+                </a>
+
+                <a href="{% url 'audit_log_list' %}" class="sidebar-link">
+                    <i class="bi bi-shield-check"></i>
+                    <span>Audit Trail</span>
+                </a>
+            {% endif %}
+        {% endif %}
+
+    </div>
+</aside>

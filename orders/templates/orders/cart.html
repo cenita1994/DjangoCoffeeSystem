@@ -1,0 +1,336 @@
+{% extends 'base.html' %}
+
+{% block title %}Cart | Django Coffee System{% endblock %}
+
+{% block content %}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">My Cart</h2>
+        <p class="text-muted mb-0">
+            Review your selected products before placing your order.
+        </p>
+    </div>
+
+    <a href="{% url 'customer_menu' %}" class="btn btn-outline-dark">
+        <i class="bi bi-arrow-left me-1"></i>
+        Continue Shopping
+    </a>
+</div>
+
+{% if order and order.items.all %}
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-cart3 me-1"></i>
+                    Cart Items
+                </h5>
+            </div>
+
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Product</th>
+                                <th>Price</th>
+                                <th class="text-center">Quantity</th>
+                                <th>Subtotal</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for item in order.items.all %}
+                            <tr>
+                                <td>
+                                    <div class="fw-semibold">
+                                        {{ item.product.name }}
+                                    </div>
+
+                                    {% if item.product.size != "Not Applicable" %}
+                                    <span class="badge bg-light text-dark border">
+                                        {{ item.product.size }}
+                                    </span>
+                                    {% endif %}
+
+                                    <br>
+
+                                    <small class="text-muted">
+                                        Available quantity: {{ item.product.stock.quantity }}
+                                    </small>
+                                </td>
+
+                                <td>₱{{ item.price }}</td>
+
+                                <td class="text-center">
+                                    <div class="d-flex justify-content-center align-items-center gap-2">
+                                        <form method="POST" action="{% url 'decrease_cart_item' item.id %}">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-outline-dark">
+                                                <i class="bi bi-dash"></i>
+                                            </button>
+                                        </form>
+
+                                        <span class="fw-bold">
+                                            {{ item.quantity }}
+                                        </span>
+
+                                        <form method="POST" action="{% url 'increase_cart_item' item.id %}">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-outline-dark">
+                                                <i class="bi bi-plus"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+
+                                <td>₱{{ item.subtotal }}</td>
+
+                                <td class="text-end">
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-danger cart-remove-btn"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#removeCartItemModal"
+                                            data-action="{% url 'remove_cart_item' item.id %}"
+                                            data-product="{{ item.product.name }}{% if item.product.size != 'Not Applicable' %} - {{ item.product.size }}{% endif %}"
+                                            data-quantity="{{ item.quantity }}"
+                                            data-subtotal="₱{{ item.subtotal }}">
+                                        <i class="bi bi-trash me-1"></i>
+                                        Remove
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+<button type="button"
+                        class="btn btn-outline-danger mt-3"
+                        data-bs-toggle="modal"
+                        data-bs-target="#clearCartModal">
+                    <i class="bi bi-cart-x me-1"></i>
+                    Clear Cart
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-receipt me-1"></i>
+                    Checkout Summary
+                </h5>
+            </div>
+
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="text-muted">Order Status</span>
+                    <span class="badge bg-secondary">{{ order.status }}</span>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <span class="fw-bold">Total Amount</span>
+                    <span class="fw-bold fs-4">₱{{ order.total_amount }}</span>
+                </div>
+
+                <button type="button"
+                        class="btn btn-success w-100"
+                        data-bs-toggle="modal"
+                        data-bs-target="#placeOrderModal">
+                    <i class="bi bi-send-check me-1"></i>
+                    Place Order
+                </button>
+
+                <p class="text-muted small mt-3 mb-0">
+                    Product availability and ingredients will be validated before the order is finalized.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Place Order Confirmation Modal -->
+<div class="modal fade" id="placeOrderModal" tabindex="-1" aria-labelledby="placeOrderModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="placeOrderModalLabel">
+                    <i class="bi bi-send-check me-1"></i>
+                    Confirm Place Order
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <p class="mb-2">Are you sure you want to place this order?</p>
+
+                <div class="border rounded p-3 bg-light">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Total Items</span>
+                        <span class="fw-bold">{{ order.items.count }}</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Total Amount</span>
+                        <span class="fw-bold">₱{{ order.total_amount }}</span>
+                    </div>
+                </div>
+
+                <p class="text-muted small mt-3 mb-0">
+                    Product availability, ingredients, and payment will be checked before the order is finalized.
+                </p>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    Review Again
+                </button>
+
+                <form method="POST" action="{% url 'place_order' order.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success">
+                        Yes, Place Order
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Remove Cart Item Confirmation Modal -->
+<div class="modal fade" id="removeCartItemModal" tabindex="-1" aria-labelledby="removeCartItemModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="removeCartItemModalLabel">
+                    <i class="bi bi-trash me-1"></i>
+                    Remove Cart Item
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <p class="mb-2">Are you sure you want to remove this item from your cart?</p>
+
+                <div class="alert alert-light border mb-0">
+                    <strong id="removeCartItemName">Selected item</strong><br>
+                    Quantity: <span id="removeCartItemQuantity"></span><br>
+                    Subtotal: <span id="removeCartItemSubtotal"></span>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    Cancel
+                </button>
+
+                <form method="POST" id="removeCartItemForm">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash me-1"></i>
+                        Yes, Remove
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Clear Cart Confirmation Modal -->
+<div class="modal fade" id="clearCartModal" tabindex="-1" aria-labelledby="clearCartModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="clearCartModalLabel">
+                    <i class="bi bi-cart-x me-1"></i>
+                    Clear Cart?
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <p class="mb-2">
+                    Are you sure you want to remove all items from your cart?
+                </p>
+
+                <div class="alert alert-warning mb-0">
+                    <i class="bi bi-exclamation-triangle me-1"></i>
+                    This action cannot be undone.
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    No, Keep Items
+                </button>
+
+                <form method="POST" action="{% url 'clear_cart' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">
+                        Yes, Clear Cart
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% else %}
+
+<div class="card shadow-sm border-0">
+    <div class="card-body text-center p-5">
+        <i class="bi bi-cart-x fs-1 text-muted"></i>
+        <h4 class="fw-bold mt-3">Your cart is empty</h4>
+        <p class="text-muted">
+            Please add products from the menu before placing an order.
+        </p>
+
+        <a href="{% url 'customer_menu' %}" class="btn btn-dark">
+            <i class="bi bi-cup-hot me-1"></i>
+            Browse Menu
+        </a>
+    </div>
+</div>
+
+{% endif %}
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const removeButtons = document.querySelectorAll('.cart-remove-btn');
+    const removeForm = document.getElementById('removeCartItemForm');
+    const itemName = document.getElementById('removeCartItemName');
+    const itemQuantity = document.getElementById('removeCartItemQuantity');
+    const itemSubtotal = document.getElementById('removeCartItemSubtotal');
+
+    removeButtons.forEach(function (button) {
+        button.addEventListener('click', function () {
+            if (removeForm) {
+                removeForm.action = button.dataset.action;
+            }
+
+            if (itemName) {
+                itemName.textContent = button.dataset.product || 'Selected item';
+            }
+
+            if (itemQuantity) {
+                itemQuantity.textContent = button.dataset.quantity || '';
+            }
+
+            if (itemSubtotal) {
+                itemSubtotal.textContent = button.dataset.subtotal || '';
+            }
+        });
+    });
+});
+</script>
+
+{% endblock %}

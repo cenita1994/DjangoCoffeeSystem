@@ -1,0 +1,246 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Cashier Shift Reports | Django Coffee System
+{% endblock %}
+
+{% block content %}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">Cashier Shift Reports</h2>
+
+        {% if is_manager_or_owner_user %}
+            <p class="text-muted mb-0">
+                View all cashier shifts, expected cash drawer, actual cash counted, and over/short amounts.
+            </p>
+        {% else %}
+            <p class="text-muted mb-0">
+                View your own cashier shifts, cash drawer records, and over/short amounts.
+            </p>
+        {% endif %}
+    </div>
+
+    <div class="d-flex gap-2 flex-wrap">
+        {% if open_shift %}
+            <a href="{% url 'cashier_shift_detail' open_shift.id %}" class="btn btn-success">
+                <i class="bi bi-eye me-1"></i>
+                View My Open Shift
+            </a>
+        {% else %}
+            <a href="{% url 'open_cashier_shift' %}" class="btn btn-dark">
+                <i class="bi bi-play-circle me-1"></i>
+                Open My Shift
+            </a>
+        {% endif %}
+
+        {% if is_manager_or_owner_user %}
+        <a href="{% url 'sales_dashboard' %}" class="btn btn-outline-dark">
+            <i class="bi bi-bar-chart-line me-1"></i>
+            Sales Reports
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+{% if open_shift %}
+<div class="alert alert-success small">
+    <i class="bi bi-check-circle me-1"></i>
+    You currently have an open shift. Cashier transactions will be included in your current cash drawer report.
+</div>
+{% else %}
+<div class="alert alert-warning small">
+    <i class="bi bi-exclamation-triangle me-1"></i>
+    You do not have an open shift. Open your shift first before processing cashier transactions.
+</div>
+{% endif %}
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-dark text-white">
+        <h5 class="mb-0">
+            <i class="bi bi-funnel me-1"></i>
+            Filter Shifts
+        </h5>
+    </div>
+
+    <div class="card-body">
+        <form method="GET" class="row g-3 align-items-end">
+
+            {% if is_manager_or_owner_user %}
+            <div class="col-12 col-md-3">
+                <label class="form-label fw-semibold">{{ form.cashier.label }}</label>
+                {{ form.cashier }}
+            </div>
+            {% endif %}
+
+            <div class="col-12 col-md-3">
+                <label class="form-label fw-semibold">{{ form.status.label }}</label>
+                {{ form.status }}
+            </div>
+
+            <div class="col-12 col-md-2">
+                <label class="form-label fw-semibold">{{ form.date_from.label }}</label>
+                {{ form.date_from }}
+            </div>
+
+            <div class="col-12 col-md-2">
+                <label class="form-label fw-semibold">{{ form.date_to.label }}</label>
+                {{ form.date_to }}
+            </div>
+
+            <div class="col-12 col-md-2 d-grid">
+                <button type="submit" class="btn btn-dark">
+                    <i class="bi bi-search me-1"></i>
+                    Filter
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">
+            <i class="bi bi-list-ul me-1"></i>
+            Shift Records
+        </h5>
+
+        {% if is_manager_or_owner_user %}
+            <span class="badge bg-light text-dark">All Staff</span>
+        {% else %}
+            <span class="badge bg-light text-dark">My Shifts Only</span>
+        {% endif %}
+    </div>
+
+    <div class="card-body">
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        {% if is_manager_or_owner_user %}
+                        <th>Cashier / Staff</th>
+                        {% endif %}
+
+                        <th>Start</th>
+                        <th>End</th>
+                        <th>Status</th>
+                        <th class="text-end">Expected Cash</th>
+                        <th class="text-end">Actual Cash</th>
+                        <th class="text-end">Over / Short</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for shift in page_obj %}
+                    <tr>
+                        {% if is_manager_or_owner_user %}
+                        <td class="fw-semibold">{{ shift.cashier.username }}</td>
+                        {% endif %}
+
+                        <td>{{ shift.shift_start|date:"M d, Y h:i A" }}</td>
+
+                        <td>
+                            {% if shift.shift_end %}
+                                {{ shift.shift_end|date:"M d, Y h:i A" }}
+                            {% else %}
+                                <span class="text-muted">Ongoing</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if shift.status == 'Open' %}
+                                <span class="badge bg-success">Open</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Closed</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="text-end">₱{{ shift.expected_cash|floatformat:2 }}</td>
+
+                        <td class="text-end">
+                            {% if shift.actual_cash_counted != None %}
+                                ₱{{ shift.actual_cash_counted|floatformat:2 }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+
+                        <td class="text-end">
+                            {% if shift.actual_cash_counted == None %}
+                                —
+                            {% elif shift.over_short_amount > 0 %}
+                                <span class="text-success fw-semibold">+₱{{ shift.over_short_amount|floatformat:2 }}</span>
+                            {% elif shift.over_short_amount < 0 %}
+                                <span class="text-danger fw-semibold">₱{{ shift.over_short_amount|floatformat:2 }}</span>
+                            {% else %}
+                                ₱{{ shift.over_short_amount|floatformat:2 }}
+                            {% endif %}
+                        </td>
+
+                        <td class="text-end">
+                            <a href="{% url 'cashier_shift_detail' shift.id %}" class="btn btn-sm btn-outline-dark">
+                                View
+                            </a>
+
+                            {% if shift.status == 'Open' %}
+                            <a href="{% url 'close_cashier_shift' shift.id %}" class="btn btn-sm btn-danger">
+                                Close
+                            </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        {% if is_manager_or_owner_user %}
+                            <td colspan="8" class="text-center text-muted py-4">
+                                No cashier shifts found.
+                            </td>
+                        {% else %}
+                            <td colspan="7" class="text-center text-muted py-4">
+                                No cashier shifts found.
+                            </td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+        </div>
+
+        {% if page_obj.has_other_pages %}
+        <nav class="mt-3">
+            <ul class="pagination justify-content-end mb-0">
+
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                        Previous
+                    </a>
+                </li>
+                {% endif %}
+
+                <li class="page-item active">
+                    <span class="page-link">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                    </span>
+                </li>
+
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                        Next
+                    </a>
+                </li>
+                {% endif %}
+
+            </ul>
+        </nav>
+        {% endif %}
+
+    </div>
+</div>
+
+{% endblock %}

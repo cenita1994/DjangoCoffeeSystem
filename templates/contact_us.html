@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Contact Us | Django Coffee System
+{% endblock %}
+
+{% block content %}
+
+<section class="p-4 p-md-5 bg-light rounded shadow-sm mb-4">
+    <div class="row align-items-center g-4">
+        <div class="col-12 col-lg-7">
+            <span class="badge bg-dark px-3 py-2 mb-3">
+                <i class="bi bi-telephone me-1"></i>
+                Contact Us
+            </span>
+
+            <h1 class="fw-bold mb-3">
+                {% if page %}
+                    {{ page.title }}
+                {% else %}
+                    Visit us or get in touch.
+                {% endif %}
+            </h1>
+
+            <div class="text-muted lead mb-0">
+                {% if page and page.subtitle %}
+                    {{ page.subtitle }}
+                {% elif page %}
+                    {{ page.content|safe }}
+                {% else %}
+                    For product inquiries, online ordering concerns, and coffee shop updates,
+                    you may contact us through the details below.
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-5">
+            <div class="card border-0 shadow-sm overflow-hidden">
+                {% if page and page.image %}
+                    <img src="{{ page.image.url }}"
+                         alt="Contact Us image"
+                         class="img-fluid w-100"
+                         style="max-height: 320px; object-fit: cover;">
+                {% else %}
+                    <div class="card-body p-4 text-center">
+                        <i class="bi bi-geo-alt display-3 text-warning"></i>
+                        <h4 class="fw-bold mt-3">
+                            {% if page and page.location %}
+                                {{ page.location }}
+                            {% else %}
+                                Brgy. San Jose
+                            {% endif %}
+                        </h4>
+                        <p class="text-muted mb-0">
+                            Coffee shop location and contact information
+                        </p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+{% if page and page.content %}
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body p-4">
+        <h4 class="fw-bold mb-3">Message</h4>
+        <div class="text-muted">
+            {{ page.content|safe }}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="row g-4">
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body p-4">
+                <i class="bi bi-geo-alt fs-1 text-warning"></i>
+                <h5 class="fw-bold mt-3">Location</h5>
+                <p class="text-muted mb-0">
+                    {% if page and page.location %}
+                        {{ page.location }}
+                    {% else %}
+                        Brgy. San Jose, Plaridel, Bulacan
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body p-4">
+                <i class="bi bi-telephone fs-1 text-warning"></i>
+                <h5 class="fw-bold mt-3">Contact Number</h5>
+                <p class="text-muted mb-0">
+                    {% if page and page.contact_number %}
+                        {{ page.contact_number }}
+                    {% else %}
+                        0917-245-8821
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body p-4">
+                <i class="bi bi-envelope fs-1 text-warning"></i>
+                <h5 class="fw-bold mt-3">Email Address</h5>
+                <p class="text-muted mb-0">
+                    {% if page and page.email %}
+                        {{ page.email }}
+                    {% else %}
+                        djangocoffee.ph@gmail.com
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body p-4">
+                <i class="bi bi-clock fs-1 text-warning"></i>
+                <h5 class="fw-bold mt-3">Store Hours</h5>
+                <p class="text-muted mb-0">
+                    {% if page and page.store_hours %}
+                        {{ page.store_hours }}
+                    {% else %}
+                        Monday to Sunday, 8:00 AM - 9:00 PM
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="card border-0 shadow-sm mt-4">
+    <div class="card-body p-4">
+        <div class="row align-items-center g-4">
+            <div class="col-12 col-lg-8">
+                <h4 class="fw-bold mb-2">Find us on Google Maps</h4>
+                <p class="text-muted mb-0">
+                    Click the button to open the pinned coffee shop location.
+                </p>
+            </div>
+
+            <div class="col-12 col-lg-4 text-lg-end">
+                <a href="{% if page and page.map_url %}{{ page.map_url }}{% else %}https://www.google.com/maps/search/?api=1&query=Brgy.%20San%20Jose%2C%20Plaridel%2C%20Bulacan{% endif %}"
+                   target="_blank"
+                   class="btn btn-dark">
+                    <i class="bi bi-map me-1"></i>
+                    Open Google Maps
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,255 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Virtual Receipt | Django Coffee System
+{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4 no-print">
+    <div>
+        <h2 class="fw-bold mb-1">Virtual Receipt</h2>
+        <p class="text-muted mb-0">
+            System-generated receipt for Order #{{ order.id }}
+        </p>
+    </div>
+
+    <div class="d-flex gap-2">
+        <a href="{% url 'order_detail' order.id %}" class="btn btn-outline-dark">
+            Back to Order
+        </a>
+
+        <button onclick="window.print()" class="btn btn-dark">
+            <i class="bi bi-printer me-1"></i>
+            Print Receipt
+        </button>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6">
+
+        <div class="card shadow-sm border-0 receipt-card">
+            <div class="card-body p-4">
+
+                <div class="text-center mb-4">
+                    <h3 class="fw-bold mb-1">Django Coffee System</h3>
+                    <p class="text-muted mb-1">Virtual / System Receipt</p>
+                    <p class="small text-muted mb-0">
+                        This is a system-generated receipt for academic/demo purposes.
+                    </p>
+                </div>
+
+                <hr>
+
+                <div class="small mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-muted">Receipt No.</span>
+                        <span class="fw-bold">{{ order.receipt_number }}</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-muted">Order No.</span>
+                        <span class="fw-bold">#{{ order.id }}</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-muted">Date/Time</span>
+                        <span>{{ order.paid_at|date:"M d, Y h:i A" }}</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-muted">Order Type</span>
+                        <span>{{ order.order_type }}</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-muted">Customer</span>
+                        <span>{{ order.display_customer }}</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-muted">Cashier</span>
+                        <span>
+                            {% if order.payment_received_by %}
+                                {{ order.payment_received_by.username }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+
+                <hr>
+
+                <h6 class="fw-bold mb-3">Items</h6>
+
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th class="text-center">Qty</th>
+                                <th class="text-end">Price</th>
+                                <th class="text-end">Total</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for item in order.items.all %}
+                            <tr>
+                                <td>
+
+                                    <div class="fw-semibold">
+                                        {{ item.product.name }}
+
+                                        {% if item.product.size != "Not Applicable" %}
+                                            <span class="small text-muted">
+                                                - {{ item.product.size }}
+                                            </span>
+                                        {% endif %}
+                                    </div>
+
+
+                                    {% if item.total_discount %}
+                                    <div class="small text-danger">
+                                        Less discount: ₱{{ item.total_discount }}
+                                    </div>
+                                    {% endif %}
+                                </td>
+
+                                <td class="text-center">{{ item.quantity }}</td>
+                                <td class="text-end">₱{{ item.price }}</td>
+                                <td class="text-end">₱{{ item.net_total }}</td>
+                            </tr>
+
+                            {% if item.total_discount %}
+                                {% for discount in item.discounts.all %}
+                                <tr>
+                                    <td colspan="4" class="small text-muted">
+                                        &nbsp;&nbsp;• {{ discount.discount_rule.name }}
+                                        | Qty: {{ discount.discounted_quantity }}
+                                        | Discount: ₱{{ discount.discount_amount }}
+
+                                        {% if discount.cardholder_name %}
+                                            | Cardholder: {{ discount.cardholder_name }}
+                                        {% endif %}
+
+                                        {% if discount.card_number %}
+                                            | Card No.: {{ discount.card_number }}
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% endif %}
+
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted">
+                                    No items found.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <hr>
+
+                <div class="small">
+
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Gross Sales</span>
+                        <span>₱{{ order.subtotal_amount }}</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Less: Discounts</span>
+                        <span class="text-danger">- ₱{{ order.discount_amount }}</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>VATable Sales</span>
+                        <span>₱{{ order.vatable_sales }}</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>VAT-Exempt Sales</span>
+                        <span>₱{{ order.vat_exempt_sales }}</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>VAT Amount</span>
+                        <span>₱{{ order.vat_amount }}</span>
+                    </div>
+
+                    <hr>
+
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="fw-bold">Total Amount Due</span>
+                        <span class="fw-bold fs-5">₱{{ order.total_amount }}</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Payment Method</span>
+                        <span>{{ order.payment_method }}</span>
+                    </div>
+
+                    {% if order.payment_method == "GCash" %}
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>GCash Ref. No.</span>
+                        <span>{{ order.payment_reference_number }}</span>
+                    </div>
+                    {% endif %}
+
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Amount Received</span>
+                        <span>₱{{ order.amount_received }}</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Change</span>
+                        <span>₱{{ order.change_amount }}</span>
+                    </div>
+
+                </div>
+
+                <hr>
+
+                <div class="text-center small text-muted">
+                    <p class="mb-1">Thank you for your purchase!</p>
+                    <p class="mb-0">
+                        This virtual receipt is generated by the Django Coffee System.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+    @media print {
+        .no-print,
+        nav,
+        footer {
+            display: none !important;
+        }
+
+        body {
+            background: white !important;
+        }
+
+        .receipt-card {
+            box-shadow: none !important;
+            border: none !important;
+        }
+
+        .card {
+            border: none !important;
+        }
+    }
+</style>
+
+{% endblock %}

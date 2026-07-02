@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Smart Assistant | Django Coffee System
+
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const chatBox = document.getElementById('chatBox');
+    const chatBottom = document.getElementById('chatBottom');
+
+    function scrollChatToBottom() {
+        if (chatBox) {
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        if (chatBottom) {
+            chatBottom.scrollIntoView({ behavior: 'auto', block: 'end' });
+        }
+    }
+
+    scrollChatToBottom();
+    setTimeout(scrollChatToBottom, 100);
+    setTimeout(scrollChatToBottom, 300);
+});
+</script>
+
+{% endblock %}
+
+{% block content %}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">Smart Assistant</h2>
+        <p class="text-muted mb-0">
+            Ask about menu items, prices, availability, best sellers, ingredients, and shop information.
+        </p>
+    </div>
+
+    <form method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="clear_chat" value="1">
+        <button type="submit" class="btn btn-outline-danger">
+            <i class="bi bi-trash me-1"></i>
+            New Chat
+        </button>
+    </form>
+</div>
+
+<div class="row g-4">
+
+    <div class="col-12 col-lg-8">
+        <div class="card shadow-sm border-0">
+
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-chat-dots me-1"></i>
+                    Chat with Smart Assistant
+                </h5>
+            </div>
+
+            <div class="card-body">
+
+                <div id="chatBox" class="border rounded bg-light p-3 mb-3" style="min-height: 360px; max-height: 520px; overflow-y: auto;">
+
+                    <div class="d-flex mb-3">
+                        <div class="bg-dark text-white rounded px-3 py-2" style="max-width: 90%;">
+                            Hello! I can answer questions about products, prices, availability, best sellers, and ingredients.
+                        </div>
+                    </div>
+
+                    {% for chat in chat_history %}
+                        {% if chat.sender == "user" %}
+                            <div class="d-flex justify-content-end mb-3">
+                                <div class="bg-primary text-white rounded px-3 py-2" style="max-width: 80%;">
+                                    {{ chat.message }}
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="d-flex mb-3">
+                                <div class="bg-white border rounded px-3 py-2" style="max-width: 90%; white-space: pre-line;">
+                                    {{ chat.message }}
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% empty %}
+                        <p class="text-muted small mb-0">
+                            Start by asking a menu or shop information question.
+                        </p>
+                    {% endfor %}
+
+                    <div id="chatBottom"></div>
+
+                </div>
+
+                <form method="POST">
+                    {% csrf_token %}
+
+                    <div class="input-group">
+                        <input type="text"
+                               name="question"
+                               class="form-control"
+                               placeholder="Example: Available ba ang Iced Coffee Regular?"
+                               autocomplete="off"
+                               required
+                               autofocus>
+
+                        <button type="submit" class="btn btn-dark">
+                            <i class="bi bi-send me-1"></i>
+                            Ask
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-lg-4">
+
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-lightbulb me-1"></i>
+                    Sample Questions
+                </h5>
+            </div>
+
+            <div class="card-body">
+                <div class="d-grid gap-2">
+
+                    <form method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="question" value="What products are available?">
+                        <button type="submit" class="btn btn-outline-dark text-start">
+                            What products are available?
+                        </button>
+                    </form>
+
+                    <form method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="question" value="Magkano ang Iced Coffee Regular?">
+                        <button type="submit" class="btn btn-outline-dark text-start">
+                            Magkano ang Iced Coffee Regular?
+                        </button>
+                    </form>
+
+                    <form method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="question" value="Available ba ang Iced Coffee Regular?">
+                        <button type="submit" class="btn btn-outline-dark text-start">
+                            Available ba ang Iced Coffee Regular?
+                        </button>
+                    </form>
+
+                    <form method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="question" value="What is the best seller?">
+                        <button type="submit" class="btn btn-outline-dark text-start">
+                            What is the best seller?
+                        </button>
+                    </form>
+
+                    <form method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="question" value="Ingredients ng Iced Coffee Regular">
+                        <button type="submit" class="btn btn-outline-dark text-start">
+                            Ingredients ng Iced Coffee Regular
+                        </button>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <h6 class="fw-bold">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Assistant Type
+                </h6>
+
+                <p class="text-muted small mb-0">
+                    This is a rule-based database assistant. It does not use external AI yet.
+                    It answers using the system's current products, recipes, sales, and availability records.
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

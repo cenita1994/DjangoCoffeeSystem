@@ -1,0 +1,97 @@
+<div class="row g-4">
+
+    <div class="col-12 col-xl-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-cup-hot me-1"></i>
+                    Product Sales Table
+                </h5>
+            </div>
+
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Product</th>
+                                <th>Category</th>
+                                <th class="text-center">Qty Sold</th>
+                                <th class="text-end">Gross Sales</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for item in product_sales_queryset %}
+                            <tr>
+                                <td class="fw-semibold">{{ item.product__name }}</td>
+                                <td>{{ item.product__category|default:"Uncategorized" }}</td>
+                                <td class="text-center">{{ item.total_quantity }}</td>
+                                <td class="text-end">₱{{ item.gross_sales|floatformat:2 }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-4">
+                                    No product sales yet.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="col-12 col-xl-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-box-seam me-1"></i>
+                    Low Stock / Out of Stock
+                </h5>
+            </div>
+
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Product</th>
+                                <th class="text-center">Stock</th>
+                                <th class="text-center">Reorder Level</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for stock in low_stock_products %}
+                            <tr>
+                                <td class="fw-semibold">{{ stock.product.name }}</td>
+                                <td class="text-center">{{ stock.quantity }}</td>
+                                <td class="text-center">{{ stock.reorder_level }}</td>
+                                <td>
+                                    {% if stock.quantity == 0 %}
+                                        <span class="badge bg-danger">Out of Stock</span>
+                                    {% else %}
+                                        <span class="badge bg-warning text-dark">Low Stock</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-4">
+                                    No low stock products.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>

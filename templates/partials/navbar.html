@@ -1,0 +1,117 @@
+{% load role_tags %}
+
+<nav class="navbar navbar-expand-lg navbar-dark app-topbar shadow-sm sticky-top">
+    <div class="container-fluid px-4">
+
+        {% if user.is_authenticated %}
+        <button type="button"
+                id="sidebarCollapseToggle"
+                class="btn btn-sm btn-outline-light me-3 d-none d-lg-inline-flex align-items-center">
+            <i class="bi bi-layout-sidebar-inset"></i>
+        </button>
+        {% endif %}
+
+
+        <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="{% if user.is_authenticated %}{% url 'dashboard' %}{% else %}{% url 'home' %}{% endif %}">
+            <span class="topbar-brand-icon">
+                <i class="bi bi-cup-hot"></i>
+            </span>
+            <span>Django Coffee System</span>
+        </a>
+
+        <button class="navbar-toggler"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#topNavbar"
+                aria-controls="topNavbar"
+                aria-expanded="false"
+                aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="topNavbar">
+            <ul class="navbar-nav ms-auto align-items-lg-center mb-2 mb-lg-0 gap-lg-1">
+
+                <li class="nav-item">
+                    <a class="nav-link topbar-link" href="{% url 'about_us' %}">
+                        <i class="bi bi-info-circle me-1"></i>
+                        About Us
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link topbar-link" href="{% url 'contact_us' %}">
+                        <i class="bi bi-telephone me-1"></i>
+                        Contact Us
+                    </a>
+                </li>
+
+                {% if user.is_authenticated %}
+                <li class="nav-item dropdown ms-lg-2">
+                    <a class="nav-link dropdown-toggle topbar-user"
+                       href="#"
+                       id="userDropdown"
+                       role="button"
+                       data-bs-toggle="dropdown"
+                       aria-expanded="false">
+                        <span class="topbar-user-avatar">
+                            <i class="bi bi-person-fill"></i>
+                        </span>
+
+                        <span class="d-none d-sm-inline">{{ user.username }}</span>
+
+                        <span class="topbar-role-badge d-none d-lg-inline">
+                            {% if user|is_owner_role %}
+                                Owner
+                            {% elif user|is_manager_role %}
+                                Manager
+                            {% elif user|is_cashier_role %}
+                                Cashier
+                            {% elif user|is_customer_role %}
+                                Customer
+                            {% else %}
+                                User
+                            {% endif %}
+                        </span>
+                    </a>
+
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="userDropdown">
+                        <li>
+                            <span class="dropdown-item-text small text-muted">
+                                Signed in as <strong>{{ user.username }}</strong>
+                            </span>
+                        </li>
+
+                        <li><hr class="dropdown-divider"></li>
+
+                        <li>
+                            <a class="dropdown-item" href="{% url 'dashboard' %}">
+                                <i class="bi bi-speedometer2 me-1"></i>
+                                Dashboard
+                            </a>
+                        </li>
+
+                        <li>
+                            <form method="post" action="{% url 'logout' %}">
+                                {% csrf_token %}
+                                <button type="submit" class="dropdown-item text-danger">
+                                    <i class="bi bi-box-arrow-right me-1"></i>
+                                    Logout
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </li>
+                {% else %}
+                <li class="nav-item ms-lg-2">
+                    <a class="btn btn-light btn-sm px-3" href="{% url 'login' %}">
+                        <i class="bi bi-box-arrow-in-right me-1"></i>
+                        Login
+                    </a>
+                </li>
+                {% endif %}
+
+            </ul>
+        </div>
+    </div>
+</nav>

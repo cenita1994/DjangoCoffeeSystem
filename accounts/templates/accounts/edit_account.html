@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Edit Account | Django Coffee System
+{% endblock %}
+
+{% block content %}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">Edit Account</h2>
+        <p class="text-muted mb-0">
+            Update account details and role assignment.
+        </p>
+    </div>
+
+    {% if current_role == "Customer" %}
+        <a href="{% url 'account_list' %}?type=customers" class="btn btn-outline-dark">
+            <i class="bi bi-arrow-left me-1"></i>
+            Back to Customers
+        </a>
+    {% else %}
+        <a href="{% url 'account_list' %}?type=employees" class="btn btn-outline-dark">
+            <i class="bi bi-arrow-left me-1"></i>
+            Back to Employees
+        </a>
+    {% endif %}
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-pencil-square me-1"></i>
+                    Account Information
+                </h5>
+            </div>
+
+            <div class="card-body">
+
+                <div class="alert alert-info">
+                    <div class="fw-semibold">Editing: {{ account.username }}</div>
+                    <div class="small">
+                        Current Role: {{ current_role }} |
+                        Status:
+                        {% if account.is_active %}
+                            Active
+                        {% else %}
+                            Inactive
+                        {% endif %}
+                    </div>
+                </div>
+
+                <form method="POST">
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors }}
+                        </div>
+                    {% endif %}
+
+                    <div class="row g-3">
+
+                        <div class="col-12 col-md-6">
+                            <label class="form-label fw-semibold">First Name</label>
+                            {{ form.first_name }}
+                            {% if form.first_name.errors %}
+                                <div class="text-danger small">{{ form.first_name.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label class="form-label fw-semibold">Last Name</label>
+                            {{ form.last_name }}
+                            {% if form.last_name.errors %}
+                                <div class="text-danger small">{{ form.last_name.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label class="form-label fw-semibold">Username</label>
+                            {{ form.username }}
+                            {% if form.username.errors %}
+                                <div class="text-danger small">{{ form.username.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label class="form-label fw-semibold">Email</label>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                                <div class="text-danger small">{{ form.email.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Role / Group</label>
+                            {{ form.role }}
+                            {% if form.role.errors %}
+                                <div class="text-danger small">{{ form.role.errors }}</div>
+                            {% endif %}
+                            <div class="form-text">
+                                Changing the role will update the user's group assignment.
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        {% if current_role == "Customer" %}
+                            <a href="{% url 'account_list' %}?type=customers" class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+                        {% else %}
+                            <a href="{% url 'account_list' %}?type=employees" class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+                        {% endif %}
+
+                        <button type="submit" class="btn btn-dark">
+                            <i class="bi bi-save me-1"></i>
+                            Save Changes
+                        </button>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Wallet Transactions | Django Coffee System
+{% endblock %}
+
+{% block content %}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">Wallet Transactions</h2>
+        <p class="text-muted mb-0">
+            View cash-ins, payments, refunds, payment methods, and reference numbers.
+        </p>
+    </div>
+
+    <div class="d-flex gap-2 flex-wrap">
+        <a href="{% url 'wallet_list' %}" class="btn btn-outline-dark">
+            <i class="bi bi-arrow-left me-1"></i>
+            Back to Wallets
+        </a>
+
+        <a href="{% url 'cash_in' %}" class="btn btn-dark">
+            <i class="bi bi-cash-stack me-1"></i>
+            Cash In
+        </a>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+
+        <ul class="nav nav-pills gap-2 flex-wrap">
+
+            {% for tab in tabs %}
+            <li class="nav-item">
+                <a href="{% url 'wallet_transaction_list' %}?type={{ tab.name|urlencode }}"
+                   class="nav-link {% if active_type == tab.name %}active bg-dark{% else %}text-dark border{% endif %}">
+
+                    <i class="bi {{ tab.icon }} me-1"></i>
+                    {{ tab.name }}
+
+                    <span class="badge {% if active_type == tab.name %}bg-warning text-dark{% else %}bg-secondary{% endif %} ms-1">
+                        {{ tab.count }}
+                    </span>
+                </a>
+            </li>
+            {% endfor %}
+
+        </ul>
+
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+
+        <form method="GET" class="row g-2">
+            <input type="hidden" name="type" value="{{ active_type }}">
+
+            <div class="col-12 col-md-10">
+                <input type="text"
+                       name="q"
+                       value="{{ search_query }}"
+                       class="form-control"
+                       placeholder="Search customer, reference number, remarks, or staff">
+            </div>
+
+            <div class="col-12 col-md-2">
+                <button type="submit" class="btn btn-dark w-100">
+                    <i class="bi bi-search me-1"></i>
+                    Search
+                </button>
+            </div>
+        </form>
+
+        {% if search_query %}
+        <div class="mt-3">
+            <a href="{% url 'wallet_transaction_list' %}?type={{ active_type|urlencode }}" class="btn btn-sm btn-outline-secondary">
+                Clear Search
+            </a>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-dark text-white">
+        <h5 class="mb-0">
+            <i class="bi bi-clock-history me-1"></i>
+            {{ active_type }} Transactions
+        </h5>
+    </div>
+
+    <div class="card-body">
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Date</th>
+                        <th>Customer</th>
+                        <th>Type</th>
+                        <th>Method</th>
+                        <th>Reference No.</th>
+                        <th>Amount</th>
+                        <th>Previous Balance</th>
+                        <th>New Balance</th>
+                        <th>Reference</th>
+                        <th>Performed By</th>
+                        <th>Remarks</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for transaction in page_obj %}
+                    <tr>
+                        <td>{{ transaction.transaction_date|date:"M d, Y h:i A" }}</td>
+
+                        <td class="fw-semibold">{{ transaction.customer.username }}</td>
+
+                        <td>
+                            {% if transaction.transaction_type == "Cash In" %}
+                                <span class="badge bg-success">Cash In</span>
+                            {% elif transaction.transaction_type == "Payment" %}
+                                <span class="badge bg-danger">Payment</span>
+                            {% elif transaction.transaction_type == "Refund" %}
+                                <span class="badge bg-info text-dark">Refund</span>
+                            {% elif transaction.transaction_type == "Adjustment" %}
+                                <span class="badge bg-warning text-dark">Adjustment</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ transaction.transaction_type }}</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if transaction.payment_method %}
+                                {% if transaction.payment_method == "Cash" %}
+                                    <span class="badge bg-dark">Cash</span>
+                                {% elif transaction.payment_method == "GCash" %}
+                                    <span class="badge bg-primary">GCash</span>
+                                {% elif transaction.payment_method == "Wallet" %}
+                                    <span class="badge bg-secondary">Wallet</span>
+                                {% else %}
+                                    <span class="badge bg-light text-dark">{{ transaction.payment_method }}</span>
+                                {% endif %}
+                            {% else %}
+                                <span class="text-muted">N/A</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if transaction.reference_number %}
+                                {{ transaction.reference_number }}
+                            {% else %}
+                                <span class="text-muted">N/A</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="fw-bold">₱{{ transaction.amount }}</td>
+
+                        <td>₱{{ transaction.previous_balance }}</td>
+
+                        <td>₱{{ transaction.new_balance }}</td>
+
+                        <td>
+                            {% if transaction.reference %}
+                                {{ transaction.reference }}
+                            {% else %}
+                                <span class="text-muted">No reference</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if transaction.performed_by %}
+                                {{ transaction.performed_by.username }}
+                            {% else %}
+                                <span class="text-muted">System</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if transaction.remarks %}
+                                {{ transaction.remarks }}
+                            {% else %}
+                                <span class="text-muted">No remarks</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+
+                    {% empty %}
+                    <tr>
+                        <td colspan="11" class="text-center text-muted py-4">
+                            No wallet transactions found.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if page_obj.paginator.num_pages > 1 %}
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center flex-wrap">
+
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link text-dark"
+                       href="?type={{ active_type|urlencode }}&q={{ search_query }}&page={{ page_obj.previous_page_number }}">
+                        Previous
+                    </a>
+                </li>
+                {% endif %}
+
+                <li class="page-item active">
+                    <span class="page-link bg-dark border-dark">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                    </span>
+                </li>
+
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link text-dark"
+                       href="?type={{ active_type|urlencode }}&q={{ search_query }}&page={{ page_obj.next_page_number }}">
+                        Next
+                    </a>
+                </li>
+                {% endif %}
+
+            </ul>
+        </nav>
+        {% endif %}
+
+        <p class="text-muted small mt-3 mb-0">
+            GCash cash-ins should include a reference number for verification. Cash payments do not require a reference number.
+        </p>
+
+    </div>
+</div>
+
+{% endblock %}
