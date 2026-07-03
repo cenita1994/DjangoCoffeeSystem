@@ -786,6 +786,8 @@ def ingredient_movement_list(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
+    active_type_label = active_type
+
     return render(request, 'inventory/ingredient_movement_list.html', {
         'page_obj': page_obj,
         'tabs': tabs,
